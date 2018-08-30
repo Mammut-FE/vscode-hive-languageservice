@@ -1,0 +1,18 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "allowJs": true,
+    "sourceMap": true,
+    "stripInternal": true,
+    "outDir": "../out",
+    "lib": [
+      "es5",
+      "es2015.promise",
+      "es6",
+      "dom"
+    ]
+  }
+}

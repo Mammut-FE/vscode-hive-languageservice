@@ -1,0 +1,31 @@
+{
+  "name": "vscode-hive-languageservice",
+  "version": "0.0.1",
+  "description": "",
+  "main": "lib/umd/hiveLanguageService.js",
+  "module": "lib/esm/hiveLanguageService.js",
+  "keywords": [],
+  "author": "lleohao <lleohao@hotmail.com>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "@types/antlr4": "^4.7.0",
+    "@types/node": "^10.5.2",
+    "declaration-bundler-webpack-plugin": "^1.0.3",
+    "rimraf": "^2.6.2",
+    "ts-loader": "^4.4.2",
+    "typescript": "^2.8.3",
+    "webpack": "^4.16.1",
+    "webpack-cli": "^3.0.8"
+  },
+  "dependencies": {
+    "@mammut-fe/hive-parser": "^0.2.0",
+    "vscode-languageserver-types": "^3.7.2",
+    "vscode-nls": "^3.2.2"
+  },
+  "scripts": {
+    "clean": "rimraf lib",
+    "watch": "tsc -w -p ./src",
+    "build": "webpack --config ./build/webpack.config.js",
+    "build-esm": "webpack --config ./build/webpack.esm.config.js"
+  }
+}

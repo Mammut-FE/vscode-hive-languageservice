@@ -1,0 +1,13 @@
+.vscode/
+lib/**/*.js.map
+lib/*/*/*.d.ts
+!lib/*/*/htmlScanner.d.ts
+lib/*/test/
+src/
+test/
+build/
+.eslintrc
+.gitignore
+tslint.json
+.travis.yml
+gulpfile.js
