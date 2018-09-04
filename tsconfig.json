@@ -1,5 +1,4 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
@@ -7,7 +6,7 @@
     "allowJs": true,
     "sourceMap": true,
     "stripInternal": true,
-    "outDir": "../out",
+    "outDir": "./out",
     "lib": [
       "es5",
       "es2015.promise",

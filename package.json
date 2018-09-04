@@ -8,9 +8,12 @@
   "author": "lleohao <lleohao@hotmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
+    "@types/jest": "^23.3.1",
     "@types/node": "^10.5.2",
     "declaration-bundler-webpack-plugin": "^1.0.3",
+    "jest": "^23.5.0",
     "rimraf": "^2.6.2",
+    "ts-jest": "^23.1.4",
     "ts-loader": "^4.4.2",
     "typescript": "^2.8.3",
     "webpack": "^4.16.1",
@@ -26,6 +29,21 @@
     "clean": "rimraf lib",
     "watch": "tsc -w -p ./src",
     "build": "webpack --config ./build/webpack.config.js",
-    "build-esm": "webpack --config ./build/webpack.esm.config.js"
+    "build-esm": "webpack --config ./build/webpack.esm.config.js",
+    "test": "jest"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   }
 }
