@@ -1,4 +1,5 @@
-import { Program, Node, getPath } from '@mammut-fe/hive-parser';
+import { Node, getPath } from '@mammut-fe/hive-parser';
+import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import { ICompletionParticipant } from '../hiveLanguageTypes';
 import { TextDocument, Position, Range, CompletionList } from 'vscode-languageserver-types';
 
