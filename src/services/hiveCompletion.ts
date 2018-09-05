@@ -98,7 +98,6 @@ export class HiveCompletion {
         for (let entry of languageFacts.getFunctionsEntryList()) {
             result.items.push({
                 label: entry.name,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Function
             });
@@ -111,7 +110,6 @@ export class HiveCompletion {
         for (let entry of languageFacts.getKeywordEntryList()) {
             result.items.push({
                 label: entry.name,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Keyword
             });

@@ -40,7 +40,7 @@ class EntryImpl implements IEntry {
     }
 
     get description(): string {
-        return this.data.dsec || hiveData.descriptions[this.data.name];
+        return this.data.desc || hiveData.descriptions[this.data.name];
     }
 
     get restrictions(): string[] {
@@ -83,9 +83,10 @@ let builtInFunctionEntryList: IEntry[];
 
 export function getFunctionsEntryList(): IEntry[] {
     if (!builtInFunctionEntryList) {
-        keywordsList = [];
+        builtInFunctionEntryList = [];
         for (let i = 0; i < builtInFunctions.length; i++) {
             let rawEntry = builtInFunctions[i];
+            rawEntry.name += '()';
             builtInFunctionEntryList.push(new EntryImpl(rawEntry));
         }
     }
