@@ -1,4 +1,4 @@
-import { Node, getPath } from '@mammut-fe/hive-parser';
+import { Node, getPath, NodeType } from '@mammut-fe/hive-parser';
 import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import { ICompletionParticipant } from '../hiveLanguageTypes';
 import { TextDocument, Position, Range, CompletionList } from 'vscode-languageserver-types';
@@ -27,10 +27,15 @@ export class HiveCompletion {
             let result: CompletionList = { isIncomplete: false, items: [] };
             this.nodePath = getPath(this.program, this.offset);
 
-            for (let i = this.nodePath.length - 1; i > 0; i--) {
+            for (let i = this.nodePath.length - 1; i >= 0; i--) {
                 let node = this.nodePath[i];
-                console.log(node);
+
+                if (result.items.length > 0 || this.offset > node.offset) {
+                    return this.finalize(result);
+                }
             }
+
+            this.getCompletionForProgram(result);
 
             return this.finalize(result);
         } finally {
@@ -55,6 +60,23 @@ export class HiveCompletion {
         }
         return result;
     }
+
+    public getCompletionForProgram(result: CompletionList): CompletionList {
+        return result;
+    }
+
+    public getCompletionForTopLevel(result: CompletionList): CompletionList {
+        return result;
+    }
+
+    public getCompletionForFunctions(result: CompletionList): CompletionList {
+        return result;
+    }
+
+    public getCompletionsForKeywords(result: CompletionList): CompletionList {
+        return result;
+    }
+
 }
 
 function getCurrentWord(document: TextDocument, offset: number) {
