@@ -5,8 +5,7 @@ import {
     TextDocument,
     Position,
     CompletionItemKind,
-    InsertTextFormat,
-    Range
+    InsertTextFormat
 } from 'vscode-languageserver-types';
 
 export interface ItemDescription {
@@ -23,8 +22,12 @@ function asPromise<T>(result: T): Promise<T> {
     return Promise.resolve(result);
 }
 
-
-export let assertCompletion = function(completions: CompletionList, expected: ItemDescription, document: TextDocument, offset: number) {
+export let assertCompletion = function(
+    completions: CompletionList,
+    expected: ItemDescription,
+    document: TextDocument,
+    offset: number
+) {
     let matches = completions.items.filter(completion => {
         return completion.label === expected.label;
     });
@@ -33,9 +36,12 @@ export let assertCompletion = function(completions: CompletionList, expected: It
             expect(matches.length).toEqual(0);
         });
     } else {
-        test(expected.label + ' should only existing once: Actual: ' + completions.items.map(c => c.label).join(', '), () => {
-            expect(matches.length).toEqual(1);
-        });
+        test(
+            expected.label + ' should only existing once: Actual: ' + completions.items.map(c => c.label).join(', '),
+            () => {
+                expect(matches.length).toEqual(1);
+            }
+        );
     }
 
     let match = matches[0];
@@ -57,14 +63,13 @@ export let assertCompletion = function(completions: CompletionList, expected: It
 };
 
 describe('Hive - Completion', () => {
-    let testCompletionFor = function(value: string, expected: { count?: number, items?: ItemDescription[] }) {
+    let testCompletionFor = function(value: string, expected: { count?: number; items?: ItemDescription[] }) {
         let offset = value.indexOf('|');
         value = value.substr(0, offset) + value.substr(offset + 1);
 
         let ls = hiveLanguageService.getLanguageService();
 
-
-        let document = TextDocument.create('test://test/test.css', 'css', 0, value);
+        let document = TextDocument.create('test://test/test.hive', 'hive', 0, value);
         let position = Position.create(0, offset);
 
         let jsonDoc = ls.parseProgram(document.getText());
@@ -79,21 +84,10 @@ describe('Hive - Completion', () => {
             }
         }
     };
+
+    test('use', function(): any {
+        testCompletionFor('use|', {
+            items: []
+        });
+    });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
