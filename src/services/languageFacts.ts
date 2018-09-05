@@ -1,6 +1,6 @@
 import * as nls from 'vscode-nls';
-import { data } from '../data/hive';
 import * as hiveData from '../data/hive';
+
 
 const localize = nls.loadMessageBundle();
 
@@ -66,7 +66,7 @@ class EntryImpl implements IEntry {
 const keywords = hiveData.data.keywords;
 let keywordsList: IEntry[];
 
-export function getKeywordList() {
+export function getKeywordEntryList() {
     if (!keywordsList) {
         keywordsList = [];
         for (let i = 0; i < keywords.length; i++) {
@@ -76,4 +76,34 @@ export function getKeywordList() {
     }
 
     return keywordsList;
+}
+
+const builtInFunctions = hiveData.data.builtInFunctions;
+let builtInFunctionEntryList: IEntry[];
+
+export function getFunctionsEntryList(): IEntry[] {
+    if (!builtInFunctionEntryList) {
+        keywordsList = [];
+        for (let i = 0; i < builtInFunctions.length; i++) {
+            let rawEntry = builtInFunctions[i];
+            builtInFunctionEntryList.push(new EntryImpl(rawEntry));
+        }
+    }
+
+    return builtInFunctionEntryList;
+}
+
+export function getEntryDescription(entry: { description: string; data?: any }): string | null {
+    if (!entry.description || entry.description === '') {
+        return null;
+    }
+
+    let desc: string = '';
+
+    desc += entry.description;
+
+    if (entry.data && entry.data.syntax) {
+        desc += `\n\nSyntax: ${entry.data.syntax}`;
+    }
+    return desc;
 }
