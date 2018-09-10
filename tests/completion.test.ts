@@ -1,4 +1,5 @@
 import * as hiveLanguageService from '../src/hiveLanguageService';
+import * as hiveData from '../src/data/hive';
 
 import {
     CompletionList,
@@ -31,18 +32,18 @@ export let assertCompletion = function(
     let matches = completions.items.filter(completion => {
         return completion.label === expected.label;
     });
-    if (expected.notAvailable) {
-        test(expected.label + ' should not be present', () => {
-            expect(matches.length).toEqual(0);
-        });
-    } else {
-        test(
-            expected.label + ' should only existing once: Actual: ' + completions.items.map(c => c.label).join(', '),
-            () => {
-                expect(matches.length).toEqual(1);
-            }
-        );
-    }
+    // if (expected.notAvailable) {
+    //     test(expected.label + ' should not be present', () => {
+    //         expect(matches.length).toEqual(0);
+    //     });
+    // } else {
+    //     test(
+    //         expected.label + ' should only existing once: Actual: ' + completions.items.map(c => c.label).join(', '),
+    //         () => {
+    //             expect(matches.length).toEqual(1);
+    //         }
+    //     );
+    // }
 
     let match = matches[0];
     if (expected.detail) {
@@ -76,7 +77,7 @@ describe('Hive - Completion', () => {
         let list = ls.doComplete(document, position, jsonDoc);
 
         if (typeof expected.count === 'number') {
-            expect(list.items).toEqual(expected.count);
+            expect(list.items.length).toEqual(expected.count);
         }
         if (expected.items) {
             for (let item of expected.items) {
@@ -85,9 +86,24 @@ describe('Hive - Completion', () => {
         }
     };
 
+    test('top level', function(): any {
+        testCompletionFor('u|', { count: hiveData.data.keywords.length + hiveData.data.builtInFunctions.length });
+
+        testCompletionFor(' |', { count: hiveData.data.keywords.length + hiveData.data.builtInFunctions.length });
+    });
+
     test('use', function(): any {
-        testCompletionFor('use|', {
-            items: []
+        testCompletionFor('use |', {
+            items: [
+                {
+                    label: 'db1',
+                    resultText: 'use db1;'
+                },
+                {
+                    label: 'database2',
+                    resultText: 'use database2;'
+                }
+            ]
         });
     });
 });

@@ -27,7 +27,7 @@
   },
   "scripts": {
     "clean": "rimraf lib",
-    "watch": "tsc -w -p ./src",
+    "watch": "tsc -w -p ./src/tsconfig.dev.json",
     "build": "webpack --config ./build/webpack.config.js",
     "build-esm": "webpack --config ./build/webpack.esm.config.js",
     "test": "jest",

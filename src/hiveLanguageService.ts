@@ -21,6 +21,6 @@ function createFacade(parser: Parser, completion: HiveCompletion): LanguageServi
     };
 }
 
-export function getLanguageService() {
+export function getLanguageService(): LanguageService {
     return createFacade(new Parser(), new HiveCompletion());
 }

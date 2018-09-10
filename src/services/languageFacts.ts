@@ -1,6 +1,7 @@
 import * as nls from 'vscode-nls';
 import * as hiveData from '../data/hive';
 
+import mockDatabaseService from './mockDataBaseService';
 
 const localize = nls.loadMessageBundle();
 
@@ -107,4 +108,12 @@ export function getEntryDescription(entry: { description: string; data?: any }):
         desc += `\n\nSyntax: ${entry.data.syntax}`;
     }
     return desc;
+}
+
+export function getDatabaseEntryList(): IEntry[] {
+    return mockDatabaseService.getDatabaseList().map(name => {
+        return new EntryImpl({
+            name
+        });
+    });
 }

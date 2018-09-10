@@ -1,4 +1,4 @@
-import { Node, getPath } from '@mammut-fe/hive-parser';
+import { Expr, getPath, NodeType, Node, Use } from '@mammut-fe/hive-parser';
 import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import * as languageFacts from './languageFacts';
 import { ICompletionParticipant } from '../hiveLanguageTypes';
@@ -38,7 +38,11 @@ export class HiveCompletion {
             for (let i = this.nodePath.length - 1; i >= 0; i--) {
                 let node = this.nodePath[i];
 
-                if (node.parent === null) {
+                if (node.type === NodeType.Expr) {
+                    this.getCompletionsForExpr(node as Expr, result);
+                } else if (node.type === NodeType.Use) {
+                    this.getCompletionsForUse(node as Use, result);
+                } else if (node.parent === null) {
                     this.getCompletionForTopLevel(result);
                 } else {
                     continue;
@@ -84,13 +88,33 @@ export class HiveCompletion {
     }
 
     public getCompletionForProgram(result: CompletionList): CompletionList {
-        this.getCompletionForTopLevel(result);
+        if (this.program === null) {
+            return this.getCompletionForTopLevel(result);
+        }
+
+        let node = this.program.findFirstChildBeforeOffset(this.offset);
+        let prev: Node;
+
+        if (!node) {
+            return this.getCompletionForTopLevel(result);
+        }
+
+        while (node) {
+            prev = node;
+            node = node.findFirstChildBeforeOffset(this.offset);
+        }
+
+        if (prev instanceof Expr) {
+            this.getCompletionsForExpr(prev, result);
+        }
+
         return result;
     }
 
     public getCompletionForTopLevel(result: CompletionList): CompletionList {
         this.getCompletionsForKeywords(result);
         this.getCompletionForFunctions(result);
+
         return result;
     }
 
@@ -112,6 +136,31 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Keyword
+            });
+        }
+
+        return result;
+    }
+
+    public getCompletionsForExpr(node: Expr, result: CompletionList): CompletionList {
+        switch (node.getText().toLowerCase()) {
+            case 'use':
+                this.getCompletionsForUse(node, result);
+                break;
+            default:
+                this.getCompletionForTopLevel(result);
+        }
+
+        return result;
+    }
+
+    public getCompletionsForUse(node: Node, result: CompletionList): CompletionList {
+        for (let entry of languageFacts.getDatabaseEntryList()) {
+            result.items.push({
+                label: entry.name,
+                documentation: languageFacts.getEntryDescription(entry),
+                kind: CompletionItemKind.Text,
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name + ';')
             });
         }
 

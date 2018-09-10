@@ -1,9 +1,9 @@
 export interface IDatabaseServices {
-    getDatabaseList(): Promise<string[]>;
+    getDatabaseList(): string[];
 
-    getTables(db: string): Promise<string[]>
+    getTables(db: string): string[];
 
-    getColumns(db: string, table: string): Promise<string[]>
+    getColumns(db: string, table: string): string[];
 }
 
 export interface IDatabase {
@@ -36,23 +36,21 @@ export class MockDataBaseServicesImpl implements IDatabaseServices {
     constructor(public dbs: IDatabase[]) {
     }
 
-    public getDatabaseList(): Promise<string[]> {
-        const result = this.dbs.map(db => db.name);
-
-        return Promise.resolve(result);
+    public getDatabaseList(): string[] {
+        return this.dbs.map(db => db.name);
     }
 
-    public getTables(db: string): Promise<string[]> {
+    public getTables(db: string): string[] {
         const database = this.findDatabase(db);
 
-        return Promise.resolve(database.tables.map(table => table.name));
+        return database.tables.map(table => table.name);
     }
 
-    public getColumns(db: string, tableName: string): Promise<string[]> {
+    public getColumns(db: string, tableName: string): string[] {
         const database = this.findDatabase(db);
         const table = this.findTable(database, tableName);
 
-        return Promise.resolve(table.columns.map(column => column.name));
+        return table.columns.map(column => column.name);
     }
 
     private findDatabase(dbName: string): IDatabase | null {
@@ -112,23 +110,23 @@ const mockDatabase: IDatabase[] = [
         ]
     },
     {
-        name: 'db2',
+        name: 'database2',
         tables: [
             {
-                name: 'db2-table1',
-                db: 'db2',
+                name: 'database2-table1',
+                db: 'database2',
                 columns: [{
                     name: 'col1',
-                    table: 'db2-table1',
-                    db: 'db2'
+                    table: 'database2-table1',
+                    db: 'database2'
                 }, {
                     name: 'col1',
-                    table: 'db2-table1',
-                    db: 'db2'
+                    table: 'database2-table1',
+                    db: 'database2'
                 }, {
                     name: 'col1',
-                    table: 'db2-table1',
-                    db: 'db2'
+                    table: 'database2-table1',
+                    db: 'database2'
                 }]
             },
             {
