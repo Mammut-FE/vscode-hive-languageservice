@@ -122,11 +122,34 @@ export function getUseStmtEntryList() {
 }
 
 export function getDatabaseEntryList(): IEntry[] {
-    return mockDatabaseService.getDatabaseList().map(name => {
+    return mockDatabaseService.getDatabaseList().map(db => {
         return new EntryImpl({
-            name
+            name: db.name
         });
     });
+}
+
+
+export function getTableEntryList(db: string): IEntry[] {
+    if (db) {
+        return mockDatabaseService.getTables(db).map(table => {
+            return new EntryImpl({
+                name: table.name
+            });
+        });
+    } else {
+        const result = mockDatabaseService.getDatabaseList().map(db => {
+            return db.tables.map(table => {
+                return new EntryImpl({
+                    name: `${db.name}.${table.name}`
+                });
+            });
+        });
+
+        return result.reduce((prev, curr) => {
+            return prev.concat(curr);
+        }, []);
+    }
 }
 
 export function getEntryDescription(entry: { description: string; data?: any }): string | null {

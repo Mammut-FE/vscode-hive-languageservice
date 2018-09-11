@@ -110,4 +110,32 @@ describe('Hive - Completion', () => {
             ]
         });
     });
+
+    test('Select: from clause', function(): any {
+        testCompletionFor('select * from |', {
+            items: [
+                {
+                    label: 'db1.db1-table1',
+                    resultText: 'select * from db1.db1-table1'
+                },
+                {
+                    label: 'database2.database2-table1',
+                    resultText: 'select * from database2.database2-table1'
+                }
+            ]
+        });
+
+        testCompletionFor('use db1; select * from |', {
+            items: [
+                {
+                    label: 'db1-table1',
+                    resultText: 'use db1; select * from db1-table1'
+                },
+                {
+                    label: 'db1-table2',
+                    resultText: 'use db1; select * from db1-table2'
+                }
+            ]
+        });
+    });
 });

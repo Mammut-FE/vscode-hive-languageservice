@@ -1,9 +1,9 @@
 export interface IDatabaseServices {
-    getDatabaseList(): string[];
+    getDatabaseList(): IDatabase[];
 
-    getTables(db: string): string[];
+    getTables(db: string): ITable[];
 
-    getColumns(db: string, table: string): string[];
+    getColumns(db: string, table: string): IColumn[];
 }
 
 export interface IDatabase {
@@ -36,21 +36,21 @@ export class MockDataBaseServicesImpl implements IDatabaseServices {
     constructor(public dbs: IDatabase[]) {
     }
 
-    public getDatabaseList(): string[] {
-        return this.dbs.map(db => db.name);
+    public getDatabaseList(): IDatabase[] {
+        return this.dbs.map(db => db);
     }
 
-    public getTables(db: string): string[] {
+    public getTables(db: string): ITable[] {
         const database = this.findDatabase(db);
 
-        return database.tables.map(table => table.name);
+        return database.tables.map(table => table);
     }
 
-    public getColumns(db: string, tableName: string): string[] {
+    public getColumns(db: string, tableName: string): IColumn[] {
         const database = this.findDatabase(db);
         const table = this.findTable(database, tableName);
 
-        return table.columns.map(column => column.name);
+        return table.columns.map(column => column);
     }
 
     private findDatabase(dbName: string): IDatabase | null {
@@ -91,19 +91,19 @@ const mockDatabase: IDatabase[] = [
                 }]
             },
             {
-                name: 'db1-table1',
+                name: 'db1-table2',
                 db: 'db1',
                 columns: [{
                     name: 'col1',
-                    table: 'db1-table1',
+                    table: 'db1-table2',
                     db: 'db1'
                 }, {
                     name: 'col1',
-                    table: 'db1-table1',
+                    table: 'db1-table2',
                     db: 'db1'
                 }, {
                     name: 'col1',
-                    table: 'db1-table1',
+                    table: 'db1-table2',
                     db: 'db1'
                 }]
             }
