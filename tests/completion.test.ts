@@ -102,6 +102,10 @@ describe('Hive - Completion', () => {
                 {
                     label: 'database2',
                     resultText: 'use database2;'
+                },
+                {
+                    label: 'DEFAULT',
+                    resultText: 'use DEFAULT;'
                 }
             ]
         });

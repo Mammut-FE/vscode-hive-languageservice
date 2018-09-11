@@ -1,3 +1,4 @@
+import { CompletionItemKind } from 'vscode-languageserver-types';
 import * as nls from 'vscode-nls';
 import * as hiveData from '../data/hive';
 
@@ -8,6 +9,8 @@ const localize = nls.loadMessageBundle();
 export interface Value {
     name: string;
     description: string;
+    kind: CompletionItemKind;
+    needComma: boolean;
 }
 
 export interface IEntry {
@@ -28,6 +31,14 @@ class ValueImpl implements Value {
 
     get description(): string {
         return this.data.desc || hiveData.descriptions[this.data.name];
+    }
+
+    get kind(): CompletionItemKind {
+        return this.data.kind || CompletionItemKind.Text;
+    }
+
+    get needComma(): boolean {
+        return !!this.data.needComma;
     }
 }
 
@@ -95,6 +106,29 @@ export function getFunctionsEntryList(): IEntry[] {
     return builtInFunctionEntryList;
 }
 
+const useStmtList = hiveData.data.use;
+let useStmtEntryList: IEntry[];
+
+export function getUseStmtEntryList() {
+    if (!useStmtEntryList) {
+        useStmtEntryList = [];
+        for (let i = 0; i < useStmtList.length; i++) {
+            let rawEntry = useStmtList[i];
+            useStmtEntryList.push(new EntryImpl(rawEntry));
+        }
+    }
+
+    return useStmtEntryList;
+}
+
+export function getDatabaseEntryList(): IEntry[] {
+    return mockDatabaseService.getDatabaseList().map(name => {
+        return new EntryImpl({
+            name
+        });
+    });
+}
+
 export function getEntryDescription(entry: { description: string; data?: any }): string | null {
     if (!entry.description || entry.description === '') {
         return null;
@@ -108,12 +142,4 @@ export function getEntryDescription(entry: { description: string; data?: any }):
         desc += `\n\nSyntax: ${entry.data.syntax}`;
     }
     return desc;
-}
-
-export function getDatabaseEntryList(): IEntry[] {
-    return mockDatabaseService.getDatabaseList().map(name => {
-        return new EntryImpl({
-            name
-        });
-    });
 }

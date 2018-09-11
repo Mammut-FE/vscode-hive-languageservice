@@ -7,9 +7,13 @@ import {
     Position,
     Range,
     CompletionList,
+    CompletionItem,
     CompletionItemKind,
+    InsertTextFormat,
     TextEdit
 } from 'vscode-languageserver-types';
+
+const SnippetFormat = InsertTextFormat.Snippet;
 
 export class HiveCompletion {
     position: Position;
@@ -155,6 +159,10 @@ export class HiveCompletion {
     }
 
     public getCompletionsForUse(node: Node, result: CompletionList): CompletionList {
+        for (let entry of languageFacts.getUseStmtEntryList()) {
+            this.getValueEnumProposals(entry, null, result);
+        }
+
         for (let entry of languageFacts.getDatabaseEntryList()) {
             result.items.push({
                 label: entry.name,
@@ -164,6 +172,37 @@ export class HiveCompletion {
             });
         }
 
+        return result;
+    }
+
+    public getValueEnumProposals(entry: languageFacts.IEntry, existingNode: Node, result: CompletionList): CompletionList {
+        if (entry.values) {
+            for (let value of entry.values) {
+                let insertString = value.name;
+                let insertTextFormat;
+                if (insertString.endsWith(')')) {
+                    let from = insertString.lastIndexOf('(');
+                    if (from !== -1) {
+                        insertString = insertString.substr(0, from) + '($1)';
+                        insertTextFormat = SnippetFormat;
+                    }
+                }
+
+                if (value.needComma) {
+                    insertString = insertString + ';';
+                }
+
+                let item: CompletionItem = {
+                    label: value.name,
+                    documentation: languageFacts.getEntryDescription(value),
+                    textEdit: TextEdit.replace(this.getCompletionRange(existingNode), insertString),
+                    kind: value.kind,
+                    insertTextFormat,
+                    sortText: 'z'
+                };
+                result.items.push(item);
+            }
+        }
         return result;
     }
 
