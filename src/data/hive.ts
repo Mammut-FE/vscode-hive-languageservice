@@ -28,6 +28,10 @@ export const data: any = {
                     desc: 'HiveQL default database.',
                     kind: CompletionItemKind.Keyword,
                     needComma: true
+                },
+                {
+                    name: '*',
+                    kind: CompletionItemKind.Value
                 }
             ]
         }

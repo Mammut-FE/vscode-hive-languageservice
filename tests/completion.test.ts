@@ -138,4 +138,40 @@ describe('Hive - Completion', () => {
             ]
         });
     });
+
+    test('Select: select_list clause', function(): any {
+        testCompletionFor('select | from db1.db1_table1', {
+            items: [
+                {
+                    label: 'col1',
+                    resultText: 'select col1 from db1.db1_table1'
+                },
+                {
+                    label: 'col2',
+                    resultText: 'select col2 from db1.db1_table1'
+                },
+                {
+                    label: '*',
+                    resultText: 'select * from db1.db1_table1'
+                }
+            ]
+        });
+
+        testCompletionFor('use db1; select | from db1_table1', {
+            items: [
+                {
+                    label: 'col1',
+                    resultText: 'use db1; select col1 from db1_table1'
+                },
+                {
+                    label: 'col2',
+                    resultText: 'use db1; select col2 from db1_table1'
+                },
+                {
+                    label: '*',
+                    resultText: 'use db1; select * from db1_table1'
+                }
+            ]
+        });
+    });
 });

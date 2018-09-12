@@ -121,6 +121,21 @@ export function getUseStmtEntryList() {
     return useStmtEntryList;
 }
 
+const selectStmtList = hiveData.data.select;
+let selectStmtEntryList: IEntry[];
+
+export function getSelectStmtEntryList() {
+    if (!selectStmtEntryList) {
+        selectStmtEntryList = [];
+        for (let i = 0; i < selectStmtList.length; i++) {
+            let rawEntry = selectStmtList[i];
+            selectStmtEntryList.push(new EntryImpl(rawEntry));
+        }
+    }
+
+    return selectStmtEntryList;
+}
+
 export function getDatabaseEntryList(): IEntry[] {
     return mockDatabaseService.getDatabaseList().map(db => {
         return new EntryImpl({
@@ -128,7 +143,6 @@ export function getDatabaseEntryList(): IEntry[] {
         });
     });
 }
-
 
 export function getTableEntryList(db: string): IEntry[] {
     if (db) {
@@ -150,6 +164,18 @@ export function getTableEntryList(db: string): IEntry[] {
             return prev.concat(curr);
         }, []);
     }
+}
+
+export function getColumnEntryList(dbName: string, tableName: string): IEntry[] {
+    const columnsList = mockDatabaseService.getColumns(dbName, tableName).map(column => {
+        return new EntryImpl({
+            name: column.name
+        });
+    });
+
+    columnsList.push(new EntryImpl({ name: '*' }));
+
+    return columnsList;
 }
 
 export function getEntryDescription(entry: { description: string; data?: any }): string | null {

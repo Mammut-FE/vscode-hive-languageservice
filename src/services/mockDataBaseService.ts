@@ -74,36 +74,36 @@ const mockDatabase: IDatabase[] = [
         name: 'db1',
         tables: [
             {
-                name: 'db1-table1',
+                name: 'db1_table1',
                 db: 'db1',
                 columns: [{
                     name: 'col1',
-                    table: 'db1-table1',
+                    table: 'db1_table1',
                     db: 'db1'
                 }, {
-                    name: 'col1',
-                    table: 'db1-table1',
+                    name: 'col2',
+                    table: 'db1_table1',
                     db: 'db1'
                 }, {
-                    name: 'col1',
-                    table: 'db1-table1',
+                    name: 'col3',
+                    table: 'db1_table1',
                     db: 'db1'
                 }]
             },
             {
-                name: 'db1-table2',
+                name: 'db1_table2',
                 db: 'db1',
                 columns: [{
                     name: 'col1',
-                    table: 'db1-table2',
+                    table: 'db1_table2',
                     db: 'db1'
                 }, {
                     name: 'col1',
-                    table: 'db1-table2',
+                    table: 'db1_table2',
                     db: 'db1'
                 }, {
                     name: 'col1',
-                    table: 'db1-table2',
+                    table: 'db1_table2',
                     db: 'db1'
                 }]
             }
@@ -113,36 +113,36 @@ const mockDatabase: IDatabase[] = [
         name: 'database2',
         tables: [
             {
-                name: 'database2-table1',
+                name: 'database2_table1',
                 db: 'database2',
                 columns: [{
                     name: 'col1',
-                    table: 'database2-table1',
+                    table: 'database2_table1',
+                    db: 'database2'
+                }, {
+                    name: 'col2',
+                    table: 'database2_table1',
                     db: 'database2'
                 }, {
                     name: 'col1',
-                    table: 'database2-table1',
-                    db: 'database2'
-                }, {
-                    name: 'col1',
-                    table: 'database2-table1',
+                    table: 'database2_table1',
                     db: 'database2'
                 }]
             },
             {
-                name: 'db2-table1',
+                name: 'db2_table1',
                 db: 'db2',
                 columns: [{
                     name: 'col1',
-                    table: 'db2-table1',
+                    table: 'db2_table1',
                     db: 'db2'
                 }, {
-                    name: 'col1',
-                    table: 'db2-table1',
+                    name: 'col2',
+                    table: 'db2_table1',
                     db: 'db2'
                 }, {
-                    name: 'col1',
-                    table: 'db2-table1',
+                    name: 'col3',
+                    table: 'db2_table1',
                     db: 'db2'
                 }]
             }

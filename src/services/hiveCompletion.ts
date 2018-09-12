@@ -1,4 +1,4 @@
-import { Expr, getPath, Keyword, Node, NodeType, Select, Use } from '@mammut-fe/hive-parser';
+import { Expr, getPath, Keyword, Node, NodeType, Select, SubSelect, Use } from '@mammut-fe/hive-parser';
 import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import {
     CompletionItem,
@@ -78,6 +78,8 @@ export class HiveCompletion {
 
                 if (node.type === NodeType.Use) {
                     this.getCompletionsForUse(node as Use, result);
+                } else if (node.type === NodeType.SubSelect) {
+                    this.getCompletionsForSelect(node, result);
                 } else if (node.type === NodeType.Expr) {
                     this.getCompletionsForExpr(node as Expr, result);
                 } else if (node.type === NodeType.Keyword) {
@@ -199,6 +201,11 @@ export class HiveCompletion {
 
     public getCompletionsForKeywords(node: Node, result: CompletionList): CompletionList {
         if (node) {
+            switch (node.getText().toLowerCase()) {
+                case 'select':
+                    this.getCompletionsForSelect(node, result);
+                    break;
+            }
         } else {
             for (let entry of languageFacts.getKeywordEntryList()) {
                 result.items.push({
@@ -219,6 +226,9 @@ export class HiveCompletion {
                 break;
             case 'from':
                 this.getCompletionsForFrom(node, result);
+                break;
+            case 'select':
+                this.getCompletionsForSelect(node, result);
                 break;
             default:
                 this.getCompletionForTopLevel(result);
@@ -244,10 +254,6 @@ export class HiveCompletion {
         return result;
     }
 
-    public getCompletionForSelect(node: Node, result: CompletionList): CompletionList {
-        return result;
-    }
-
     public getCompletionsForFrom(node: Node, result: CompletionList): CompletionList {
         let prevNode = this.getPrevNode(node);
 
@@ -267,6 +273,42 @@ export class HiveCompletion {
                 }
             }
         }
+
+        return result;
+    }
+
+    public getCompletionsForSelect(node: Node, result: CompletionList): CompletionList {
+        if (node instanceof Expr) {
+            for (let entry of languageFacts.getSelectStmtEntryList()) {
+                this.getValueEnumProposals(entry, null, result);
+            }
+        } else if (node instanceof Keyword || node instanceof SubSelect) {
+            const subSelect = node.findParent(NodeType.SubSelect) as SubSelect;
+            const selectCols = subSelect.getSelectCols();
+
+            if (selectCols.length > 0 && selectCols[0].name === 'from') {
+                let _ = selectCols[0].aliasName.split('.');
+                let dbName, tableName;
+
+                if (_.length > 1) {
+                    [dbName, tableName] = _;
+                } else {
+                    dbName = this.getCurrentDatabase(node.findParent(NodeType.Select).offset);
+                    [tableName] = _;
+                }
+
+                for (let entry of languageFacts.getColumnEntryList(dbName, tableName)) {
+                    result.items.push({
+                        label: entry.name,
+                        documentation: languageFacts.getEntryDescription(entry),
+                        kind: CompletionItemKind.Text,
+                        textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+                    });
+                }
+
+            }
+        }
+
 
         return result;
     }
