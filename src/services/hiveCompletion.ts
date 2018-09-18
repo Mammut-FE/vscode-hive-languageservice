@@ -77,9 +77,10 @@ export class HiveCompletion {
                 let node = this.nodePath[i];
 
                 if (node.type === NodeType.Use) {
-                    this.getCompletionsForUse(node as Use, result);
                 } else if (node.type === NodeType.SubSelect) {
                     this.getCompletionsForSelect(node, result);
+                } else if (node.type === NodeType.SelectList) {
+                    this.getCompletionsForSelect(node.findParent(NodeType.SubSelect), result);
                 } else if (node.type === NodeType.Expr) {
                     this.getCompletionsForExpr(node as Expr, result);
                 } else if (node.type === NodeType.Keyword) {
@@ -286,8 +287,12 @@ export class HiveCompletion {
             const subSelect = node.findParent(NodeType.SubSelect) as SubSelect;
             const selectCols = subSelect.getSelectCols();
 
-            if (selectCols.length > 0 && selectCols[0].name === 'from') {
-                let _ = selectCols[0].aliasName.split('.');
+            const fromTable = selectCols.filter(col => {
+                return col.name.toLowerCase() === 'from';
+            });
+
+            if (fromTable.length > 0) {
+                let _ = fromTable[0].aliasName.split('.');
                 let dbName, tableName;
 
                 if (_.length > 1) {
@@ -305,10 +310,8 @@ export class HiveCompletion {
                         textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
                     });
                 }
-
             }
         }
-
 
         return result;
     }
