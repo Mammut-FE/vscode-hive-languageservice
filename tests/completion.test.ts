@@ -73,7 +73,14 @@ describe('Hive - Completion', () => {
         let document = TextDocument.create('test://test/test.hive', 'hive', 0, value);
         let position = Position.create(0, offset);
 
+        let text = document.getText();
         let jsonDoc = ls.parseProgram(document.getText());
+
+        if (jsonDoc === null && text.trim() !== '') {
+            text = text.substr(0, offset) + 'PLACEHOLDER' + text.substr(offset);
+            jsonDoc = ls.parseProgram(text);
+        }
+
         let list = ls.doComplete(document, position, jsonDoc);
 
         if (typeof expected.count === 'number') {
@@ -115,12 +122,12 @@ describe('Hive - Completion', () => {
         testCompletionFor('select * from |', {
             items: [
                 {
-                    label: 'db1.db1-table1',
-                    resultText: 'select * from db1.db1-table1'
+                    label: 'db1.db1_table1',
+                    resultText: 'select * from db1.db1_table1'
                 },
                 {
-                    label: 'database2.database2-table1',
-                    resultText: 'select * from database2.database2-table1'
+                    label: 'database2.database2_table1',
+                    resultText: 'select * from database2.database2_table1'
                 }
             ]
         });
@@ -128,12 +135,25 @@ describe('Hive - Completion', () => {
         testCompletionFor('use db1; select * from |', {
             items: [
                 {
-                    label: 'db1-table1',
-                    resultText: 'use db1; select * from db1-table1'
+                    label: 'db1_table1',
+                    resultText: 'use db1; select * from db1_table1'
                 },
                 {
-                    label: 'db1-table2',
-                    resultText: 'use db1; select * from db1-table2'
+                    label: 'db1_table2',
+                    resultText: 'use db1; select * from db1_table2'
+                }
+            ]
+        });
+
+        testCompletionFor('select * from db1.|', {
+            items: [
+                {
+                    label: 'db1_table1',
+                    resultText: 'select * from db1.db1_table1'
+                },
+                {
+                    label: 'db1_table2',
+                    resultText: 'select * from db1.db1_table2'
                 }
             ]
         });

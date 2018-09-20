@@ -1,4 +1,15 @@
-import { Expr, getPath, Identifier, Keyword, Node, NodeType, Select, SubSelect, Use } from '@mammut-fe/hive-parser';
+import {
+    Expr,
+    getPath,
+    Identifier,
+    Keyword,
+    Node,
+    NodeType,
+    Select,
+    SubSelect,
+    TableName,
+    Use
+} from '@mammut-fe/hive-parser';
 import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import {
     CompletionItem,
@@ -33,14 +44,6 @@ export class HiveCompletion {
         return this.defaultReplaceRange;
     }
 
-    private getPrevNode(node: Node): Node {
-        if (node.offset - 1 < 0) {
-            return null;
-        }
-
-        return this.program.findChildAtOffset(node.offset - 1, true);
-    }
-
     private getCurrentDatabase(offset: number) {
         const block = this.program.getBlockNode();
 
@@ -57,6 +60,18 @@ export class HiveCompletion {
         }
 
         return '';
+    }
+
+    private findBeforeExprNode(node: Expr): Node {
+        let offset = node.offset - 1;
+        let prev = this.program.findChildAtOffset(offset, true);
+
+        while (prev.type === NodeType.Expr) {
+            offset = prev.offset - 1;
+            prev = this.program.findChildAtOffset(offset, true);
+        }
+
+        return prev;
     }
 
     public doComplete(document: TextDocument, position: Position, program: Program): CompletionList {
@@ -81,6 +96,8 @@ export class HiveCompletion {
                     this.getCompletionsForSelect(node, result);
                 } else if (node.type === NodeType.SelectList) {
                     this.getCompletionsForSelect(node.findParent(NodeType.SubSelect), result);
+                } else if (node.type === NodeType.TableName) {
+                    this.getCompletionsForFrom(node, result);
                 } else if (node.type === NodeType.Expr) {
                     this.getCompletionsForExpr(node as Expr, result);
                 } else if (node.type === NodeType.Keyword) {
@@ -263,13 +280,24 @@ export class HiveCompletion {
     }
 
     public getCompletionsForFrom(node: Node, result: CompletionList): CompletionList {
-        let prevNode = this.getPrevNode(node);
+        if (node.type === NodeType.Expr) {
+            let prev = this.findBeforeExprNode(node);
 
-        if (prevNode) {
-            let selectNode = prevNode.findParent(NodeType.Select) as Select;
+            let selectNode = prev.findParent(NodeType.Select) as Select;
 
             if (selectNode) {
                 this.getTableCompletionList(selectNode, result);
+            }
+        } else if (node.type === NodeType.TableName) {
+            let [db] = (node as TableName).getTableName().split('.');
+
+            for (let entry of languageFacts.getTableEntryList(db)) {
+                result.items.push({
+                    label: entry.name,
+                    documentation: languageFacts.getEntryDescription(entry),
+                    kind: CompletionItemKind.Text,
+                    textEdit: TextEdit.replace(this.getCompletionRange((node as TableName).identifier.dotNode), '.' + entry.name)
+                });
             }
         }
 
@@ -354,20 +382,6 @@ export class HiveCompletion {
 
         return result;
     }
-
-    private findBeforeExprNode(node: Expr): Node {
-        let offset = node.offset - 1;
-        let prev = this.program.findChildAtOffset(offset, true);
-
-        while (prev.type === NodeType.Expr) {
-            offset = prev.offset - 1;
-            prev = this.program.findChildAtOffset(offset, true);
-        }
-
-        return prev;
-    }
-
-
 }
 
 function getCurrentWord(document: TextDocument, offset: number) {
