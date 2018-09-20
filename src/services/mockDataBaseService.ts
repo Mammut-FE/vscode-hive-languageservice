@@ -43,14 +43,25 @@ export class MockDataBaseServicesImpl implements IDatabaseServices {
     public getTables(db: string): ITable[] {
         const database = this.findDatabase(db);
 
-        return database.tables.map(table => table);
+        if (database) {
+            return database.tables.map(table => table);
+        }
+
+        return [];
     }
 
     public getColumns(db: string, tableName: string): IColumn[] {
         const database = this.findDatabase(db);
-        const table = this.findTable(database, tableName);
 
-        return table.columns.map(column => column);
+        if (database) {
+            const table = this.findTable(database, tableName);
+
+            if (table) {
+                return table.columns.map(column => column);
+            }
+        }
+
+        return [];
     }
 
     private findDatabase(dbName: string): IDatabase | null {

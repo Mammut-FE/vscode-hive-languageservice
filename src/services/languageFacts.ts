@@ -153,12 +153,14 @@ export function getTableEntryList(db: string): IEntry[] {
         });
     } else {
         const result = mockDatabaseService.getDatabaseList().map(db => {
-            return db.tables.map(table => {
-                return new EntryImpl({
-                    name: `${db.name}.${table.name}`
+            if (db) {
+                return db.tables.map(table => {
+                    return new EntryImpl({
+                        name: `${db.name}.${table.name}`
+                    });
                 });
-            });
-        });
+            }
+        }).filter(_ => _);
 
         return result.reduce((prev, curr) => {
             return prev.concat(curr);
