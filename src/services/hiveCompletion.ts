@@ -1,4 +1,4 @@
-import { Expr, getPath, Keyword, Node, NodeType, Select, SubSelect, Use } from '@mammut-fe/hive-parser';
+import { Expr, getPath, Identifier, Keyword, Node, NodeType, Select, SubSelect, Use } from '@mammut-fe/hive-parser';
 import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import {
     CompletionItem,
@@ -178,6 +178,10 @@ export class HiveCompletion {
             this.getCompletionsForExpr(prev, result);
         }
 
+        if (prev instanceof Identifier) {
+            this.getCompletionsForIdentifier(prev, result);
+        }
+
         return result;
     }
 
@@ -231,6 +235,9 @@ export class HiveCompletion {
             case 'select':
                 this.getCompletionsForSelect(node, result);
                 break;
+            case 'join':
+                this.getCompletionsForJoin(node, result);
+                break;
             default:
                 this.getCompletionForTopLevel(result);
         }
@@ -262,16 +269,7 @@ export class HiveCompletion {
             let selectNode = prevNode.findParent(NodeType.Select) as Select;
 
             if (selectNode) {
-                let currentDatabase = this.getCurrentDatabase(selectNode.offset);
-
-                for (let entry of languageFacts.getTableEntryList(currentDatabase)) {
-                    result.items.push({
-                        label: entry.name,
-                        documentation: languageFacts.getEntryDescription(entry),
-                        kind: CompletionItemKind.Text,
-                        textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
-                    });
-                }
+                this.getTableCompletionList(selectNode, result);
             }
         }
 
@@ -315,6 +313,61 @@ export class HiveCompletion {
 
         return result;
     }
+
+    public getCompletionsForIdentifier(node: Node, result: CompletionList): CompletionList {
+        if (node.findParent(NodeType.FromClause)) {
+            this.getCompletionsForJoin(node, result);
+        }
+
+        return result;
+    }
+
+    public getCompletionsForJoin(node: Node, result: CompletionList): CompletionList {
+        let selectNode;
+
+        if (node.type === NodeType.Identifier) {
+            selectNode = node.findParent(NodeType.Select) as Select;
+        } else if (node.type === NodeType.Expr) {
+            const prev = this.findBeforeExprNode(node);
+
+            selectNode = prev.findParent(NodeType.Select) as Select;
+        }
+
+        if (selectNode) {
+            this.getTableCompletionList(selectNode, result);
+        }
+
+        return result;
+    }
+
+    public getTableCompletionList(node: Node, result: CompletionList): CompletionList {
+        let currentDatabase = this.getCurrentDatabase(node.offset);
+
+        for (let entry of languageFacts.getTableEntryList(currentDatabase)) {
+            result.items.push({
+                label: entry.name,
+                documentation: languageFacts.getEntryDescription(entry),
+                kind: CompletionItemKind.Text,
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+            });
+        }
+
+        return result;
+    }
+
+    private findBeforeExprNode(node: Expr): Node {
+        let offset = node.offset - 1;
+        let prev = this.program.findChildAtOffset(offset, true);
+
+        while (prev.type === NodeType.Expr) {
+            offset = prev.offset - 1;
+            prev = this.program.findChildAtOffset(offset, true);
+        }
+
+        return prev;
+    }
+
+
 }
 
 function getCurrentWord(document: TextDocument, offset: number) {

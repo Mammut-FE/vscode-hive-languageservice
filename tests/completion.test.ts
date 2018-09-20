@@ -183,4 +183,33 @@ describe('Hive - Completion', () => {
             ]
         });
     });
+
+    test('Select: join clause', function() {
+        testCompletionFor('SELECT * FROM db1.db1_table1 t1, |', {
+            items: [
+                {
+                    label: 'db1.db1_table2',
+                    resultText: 'SELECT * FROM db1.db1_table1 t1, db1.db1_table2'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM db1.db1_table1 JOIN |', {
+            items: [
+                {
+                    label: 'db1.db1_table2',
+                    resultText: 'SELECT * FROM db1.db1_table1 JOIN db1.db1_table2'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM db1.db1_table1 LEFT JOIN |', {
+            items: [
+                {
+                    label: 'db1.db1_table2',
+                    resultText: 'SELECT * FROM db1.db1_table1 LEFT JOIN db1.db1_table2'
+                }
+            ]
+        });
+    });
 });
