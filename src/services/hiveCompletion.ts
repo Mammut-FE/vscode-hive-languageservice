@@ -4,11 +4,11 @@ import {
     Keyword,
     Node,
     NodeType,
+    Program,
     Select,
     SubSelect,
     TableName,
-    Use,
-    Program
+    Use
 } from '@mammut-fe/hive-parser';
 import {
     CompletionItem,
@@ -37,10 +37,33 @@ export class HiveCompletion {
 
     private getCompletionRange(existingNode: Node) {
         if (existingNode && existingNode.offset <= this.offset) {
-            let end = existingNode.end !== -1 ? this.textDocument.positionAt(existingNode.end) : this.position;
-            return Range.create(this.textDocument.positionAt(existingNode.offset + 1), end);
+            const index = existingNode.getText().indexOf('.');
+            let end, start;
+
+            if (index > -1) {
+                start = this.textDocument.positionAt(existingNode.offset + index + 1);
+                end = start;
+            } else {
+                start = this.textDocument.positionAt(existingNode.offset + 1);
+                end = existingNode.end !== -1 ? this.textDocument.positionAt(existingNode.end) : this.position;
+            }
+
+            return Range.create(start, end);
         }
+
         return this.defaultReplaceRange;
+    }
+
+    private findBeforeExprNode(node: Expr): Node {
+        let offset = node.offset - 1;
+        let prev = this.program.findChildAtOffset(offset, true);
+
+        while (prev.type === NodeType.Expr) {
+            offset = prev.offset - 1;
+            prev = this.program.findChildAtOffset(offset, true);
+        }
+
+        return prev;
     }
 
     private getCurrentDatabase(offset: number) {
@@ -61,16 +84,17 @@ export class HiveCompletion {
         return '';
     }
 
-    private findBeforeExprNode(node: Expr): Node {
-        let offset = node.offset - 1;
-        let prev = this.program.findChildAtOffset(offset, true);
+    private getCurrentTableInfo(node: Node, str: string) {
+        let [dbName, tableName] = str.split('.');
 
-        while (prev.type === NodeType.Expr) {
-            offset = prev.offset - 1;
-            prev = this.program.findChildAtOffset(offset, true);
+        if (tableName === undefined) {
+            tableName = dbName;
+            dbName = this.getCurrentDatabase(node.findParent(NodeType.Select).offset);
         }
 
-        return prev;
+        return {
+            dbName, tableName
+        };
     }
 
     public doComplete(document: TextDocument, position: Position, program: Program): CompletionList {
@@ -92,9 +116,9 @@ export class HiveCompletion {
 
                 if (node.type === NodeType.Use) {
                 } else if (node.type === NodeType.SubSelect) {
-                    this.getCompletionsForSelect(node, result);
+                    this.getCompletionsForSelectList(node, result);
                 } else if (node.type === NodeType.SelectList) {
-                    this.getCompletionsForSelect(node.findParent(NodeType.SubSelect), result);
+                    this.getCompletionsForSelectList(node.findParent(NodeType.SubSelect), result);
                 } else if (node.type === NodeType.TableName) {
                     this.getCompletionsForFrom(node, result);
                 } else if (node.type === NodeType.Expr) {
@@ -224,7 +248,7 @@ export class HiveCompletion {
         if (node) {
             switch (node.getText().toLowerCase()) {
                 case 'select':
-                    this.getCompletionsForSelect(node, result);
+                    this.getCompletionsForSelectList(node, result);
                     break;
             }
         } else {
@@ -241,21 +265,30 @@ export class HiveCompletion {
     }
 
     public getCompletionsForExpr(node: Expr, result: CompletionList): CompletionList {
-        switch (node.getText().toLowerCase()) {
-            case 'use':
-                this.getCompletionsForUse(node, result);
-                break;
-            case 'from':
-                this.getCompletionsForFrom(node, result);
-                break;
-            case 'select':
-                this.getCompletionsForSelect(node, result);
-                break;
-            case 'join':
-                this.getCompletionsForJoin(node, result);
-                break;
-            default:
-                this.getCompletionForTopLevel(result);
+        const exprText = node.getText().toLowerCase();
+
+        if (exprText.indexOf('.') !== -1) {
+            if (node.parent.type === NodeType.SelectListItem) {
+                const [aliasName] = exprText.split('.');
+                this.getCompletionsForSelectList(node, result, aliasName);
+            }
+        } else {
+            switch (node.getText().toLowerCase()) {
+                case 'use':
+                    this.getCompletionsForUse(node, result);
+                    break;
+                case 'from':
+                    this.getCompletionsForFrom(node, result);
+                    break;
+                case 'select':
+                    this.getCompletionsForSelectList(node, result);
+                    break;
+                case 'join':
+                    this.getCompletionsForJoin(node, result);
+                    break;
+                default:
+                    this.getCompletionForTopLevel(result);
+            }
         }
 
         return result;
@@ -306,8 +339,29 @@ export class HiveCompletion {
         return result;
     }
 
-    public getCompletionsForSelect(node: Node, result: CompletionList): CompletionList {
+    public getCompletionsForSelectList(node: Node, result: CompletionList, tableAliasName?: string): CompletionList {
         if (node instanceof Expr) {
+            if (tableAliasName) {
+                const subSelect = node.findParent(NodeType.SubSelect) as SubSelect;
+                const fromTables = subSelect.getFromTables();
+                const { rawTable } = fromTables.filter(({ rawTable, aliasName }) => {
+                    return aliasName ? aliasName === tableAliasName : rawTable === tableAliasName;
+                })[0];
+
+                if (rawTable) {
+                    const { dbName, tableName } = this.getCurrentTableInfo(node, rawTable as string);
+
+                    for (let entry of languageFacts.getColumnEntryList(dbName, tableName)) {
+                        result.items.push({
+                            label: entry.name,
+                            documentation: languageFacts.getEntryDescription(entry),
+                            kind: CompletionItemKind.Text,
+                            textEdit: TextEdit.replace(this.getCompletionRange(node), entry.name)
+                        });
+                    }
+                }
+            }
+
             for (let entry of languageFacts.getSelectStmtEntryList()) {
                 this.getValueEnumProposals(entry, null, result);
             }
@@ -320,15 +374,7 @@ export class HiveCompletion {
             });
 
             if (fromTable.length > 0) {
-                let _ = fromTable[0].aliasName.split('.');
-                let dbName, tableName;
-
-                if (_.length > 1) {
-                    [dbName, tableName] = _;
-                } else {
-                    dbName = this.getCurrentDatabase(node.findParent(NodeType.Select).offset);
-                    [tableName] = _;
-                }
+                const { dbName, tableName } = this.getCurrentTableInfo(node, fromTable[0].aliasName);
 
                 for (let entry of languageFacts.getColumnEntryList(dbName, tableName)) {
                     result.items.push({
