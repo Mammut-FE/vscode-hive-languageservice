@@ -1,7 +1,6 @@
 import { CompletionList, Diagnostic, Position, TextDocument } from 'vscode-languageserver-types';
 
-import { Parser } from '@mammut-fe/hive-parser';
-import { Program } from '@mammut-fe/hive-parser/lib/nodes';
+import { Parser, Program } from '@mammut-fe/hive-parser';
 import { HiveCompletion } from './services/hiveCompletion';
 
 
