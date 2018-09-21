@@ -10,6 +10,7 @@
   "devDependencies": {
     "@types/jest": "^23.3.1",
     "@types/node": "^10.5.2",
+    "cz-conventional-changelog": "^2.1.0",
     "declaration-bundler-webpack-plugin": "^1.0.3",
     "jest": "^23.5.0",
     "rimraf": "^2.6.2",
@@ -46,5 +47,10 @@
       "json",
       "node"
     ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
