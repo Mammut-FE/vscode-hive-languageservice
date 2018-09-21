@@ -7,29 +7,17 @@ export interface IDatabaseServices {
 }
 
 export interface IDatabase {
-    id?: string | number | symbol;
-    desc?: string;
-    data?: any;
     name: string;
     tables: ITable[];
 }
 
 export interface ITable {
-    id?: string | number | symbol;
-    desc?: string;
-    data?: any;
     name: string;
-    db: string;
     columns: IColumn[];
 }
 
 export interface IColumn {
-    id?: string | number | symbol;
-    desc?: string;
-    data?: any;
     name: string;
-    table: string;
-    db: string;
 }
 
 export class MockDataBaseServicesImpl implements IDatabaseServices {
@@ -82,80 +70,50 @@ export class MockDataBaseServicesImpl implements IDatabaseServices {
 
 const mockDatabase: IDatabase[] = [
     {
-        name: 'db1',
+        name: 'school',
         tables: [
             {
-                name: 'db1_table1',
-                db: 'db1',
+                name: 'student',
                 columns: [{
-                    name: 'col1',
-                    table: 'db1_table1',
-                    db: 'db1'
+                    name: 'id'
                 }, {
-                    name: 'col2',
-                    table: 'db1_table1',
-                    db: 'db1'
+                    name: 'sex'
                 }, {
-                    name: 'col3',
-                    table: 'db1_table1',
-                    db: 'db1'
+                    name: 'age'
+                }, {
+                    name: 'name'
                 }]
             },
             {
-                name: 'db1_table2',
-                db: 'db1',
+                name: 'course',
                 columns: [{
-                    name: 'col1',
-                    table: 'db1_table2',
-                    db: 'db1'
+                    name: 'id'
                 }, {
-                    name: 'col1',
-                    table: 'db1_table2',
-                    db: 'db1'
+                    name: 'name'
                 }, {
-                    name: 'col1',
-                    table: 'db1_table2',
-                    db: 'db1'
+                    name: 'hour'
+                }, {
+                    name: 'score'
                 }]
             }
         ]
     },
     {
-        name: 'database2',
+        name: 'library',
         tables: [
             {
-                name: 'database2_table1',
-                db: 'database2',
-                columns: [{
-                    name: 'col1',
-                    table: 'database2_table1',
-                    db: 'database2'
-                }, {
-                    name: 'col2',
-                    table: 'database2_table1',
-                    db: 'database2'
-                }, {
-                    name: 'col1',
-                    table: 'database2_table1',
-                    db: 'database2'
-                }]
+                name: 'user',
+                columns: [
+                    { name: 'userid' },
+                    { name: 'password' }
+                ]
             },
             {
-                name: 'db2_table1',
-                db: 'db2',
-                columns: [{
-                    name: 'col1',
-                    table: 'db2_table1',
-                    db: 'db2'
-                }, {
-                    name: 'col2',
-                    table: 'db2_table1',
-                    db: 'db2'
-                }, {
-                    name: 'col3',
-                    table: 'db2_table1',
-                    db: 'db2'
-                }]
+                name: 'book',
+                columns: [
+                    { name: 'bookid' },
+                    { name: 'bookname' }
+                ]
             }
         ]
     }

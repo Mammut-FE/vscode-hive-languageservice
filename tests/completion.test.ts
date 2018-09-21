@@ -103,12 +103,12 @@ describe('Hive - Completion', () => {
         testCompletionFor('use |', {
             items: [
                 {
-                    label: 'db1',
-                    resultText: 'use db1;'
+                    label: 'school',
+                    resultText: 'use school;'
                 },
                 {
-                    label: 'database2',
-                    resultText: 'use database2;'
+                    label: 'library',
+                    resultText: 'use library;'
                 },
                 {
                     label: 'DEFAULT',
@@ -122,112 +122,112 @@ describe('Hive - Completion', () => {
         testCompletionFor('select * from |', {
             items: [
                 {
-                    label: 'db1.db1_table1',
-                    resultText: 'select * from db1.db1_table1'
+                    label: 'school.student',
+                    resultText: 'select * from school.student'
                 },
                 {
-                    label: 'database2.database2_table1',
-                    resultText: 'select * from database2.database2_table1'
+                    label: 'library.book',
+                    resultText: 'select * from library.book'
                 }
             ]
         });
 
-        testCompletionFor('use db1; select * from |', {
+        testCompletionFor('use school; select * from |', {
             items: [
                 {
-                    label: 'db1_table1',
-                    resultText: 'use db1; select * from db1_table1'
+                    label: 'student',
+                    resultText: 'use school; select * from student'
                 },
                 {
-                    label: 'db1_table2',
-                    resultText: 'use db1; select * from db1_table2'
+                    label: 'course',
+                    resultText: 'use school; select * from course'
                 }
             ]
         });
 
-        testCompletionFor('select * from db1.|', {
+        testCompletionFor('select * from school.|', {
             items: [
                 {
-                    label: 'db1_table1',
-                    resultText: 'select * from db1.db1_table1'
+                    label: 'student',
+                    resultText: 'select * from school.student'
                 },
                 {
-                    label: 'db1_table2',
-                    resultText: 'select * from db1.db1_table2'
+                    label: 'course',
+                    resultText: 'select * from school.course'
                 }
             ]
         });
     });
 
     test('Select: select_list clause', function(): any {
-        testCompletionFor('SELECT | FROM db1.db1_table1', {
+        testCompletionFor('SELECT | FROM school.student', {
             items: [
                 {
-                    label: 'col1',
-                    resultText: 'SELECT col1 FROM db1.db1_table1'
+                    label: 'name',
+                    resultText: 'SELECT name FROM school.student'
                 },
                 {
-                    label: 'col2',
-                    resultText: 'SELECT col2 FROM db1.db1_table1'
+                    label: 'id',
+                    resultText: 'SELECT id FROM school.student'
                 },
                 {
                     label: '*',
-                    resultText: 'SELECT * FROM db1.db1_table1'
+                    resultText: 'SELECT * FROM school.student'
                 }
             ]
         });
 
-        testCompletionFor('use db1; select | from db1_table1', {
+        testCompletionFor('use school; select | from student', {
             items: [
                 {
-                    label: 'col1',
-                    resultText: 'use db1; select col1 from db1_table1'
+                    label: 'name',
+                    resultText: 'use school; select name from student'
                 },
                 {
-                    label: 'col2',
-                    resultText: 'use db1; select col2 from db1_table1'
+                    label: 'id',
+                    resultText: 'use school; select id from student'
                 },
                 {
                     label: '*',
-                    resultText: 'use db1; select * from db1_table1'
+                    resultText: 'use school; select * from student'
                 }
             ]
         });
 
-        testCompletionFor('SELECT col1, | FROM db1.db1_table1', {
+        testCompletionFor('SELECT id, | FROM school.student', {
             items: [
                 {
-                    label: 'col2',
-                    resultText: 'SELECT col1, col2 FROM db1.db1_table1'
+                    label: 'name',
+                    resultText: 'SELECT id, name FROM school.student'
                 }
             ]
         });
     });
 
     test('Select: join clause', function() {
-        testCompletionFor('SELECT * FROM db1.db1_table1 t1, |', {
+        testCompletionFor('SELECT * FROM school.student t1, |', {
             items: [
                 {
-                    label: 'db1.db1_table2',
-                    resultText: 'SELECT * FROM db1.db1_table1 t1, db1.db1_table2'
+                    label: 'library.user',
+                    resultText: 'SELECT * FROM school.student t1, library.user'
                 }
             ]
         });
 
-        testCompletionFor('SELECT * FROM db1.db1_table1 JOIN |', {
+        testCompletionFor('SELECT * FROM school.student JOIN |', {
             items: [
                 {
-                    label: 'db1.db1_table2',
-                    resultText: 'SELECT * FROM db1.db1_table1 JOIN db1.db1_table2'
+                    label: 'school.course',
+                    resultText: 'SELECT * FROM school.student JOIN school.course'
                 }
             ]
         });
 
-        testCompletionFor('SELECT * FROM db1.db1_table1 LEFT JOIN |', {
+        testCompletionFor('SELECT * FROM school.student LEFT JOIN |', {
             items: [
                 {
-                    label: 'db1.db1_table2',
-                    resultText: 'SELECT * FROM db1.db1_table1 LEFT JOIN db1.db1_table2'
+                    label: 'school.course',
+                    resultText: 'SELECT * FROM school.student LEFT JOIN school.course'
                 }
             ]
         });
