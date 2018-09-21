@@ -1,20 +1,15 @@
-<<<<<<< HEAD
-import { Expr, getPath, Keyword, Node, NodeType, Select, SubSelect, TableName, Use } from '@mammut-fe/hive-parser';
-=======
 import {
     Expr,
     getPath,
-    Identifier,
     Keyword,
     Node,
     NodeType,
     Select,
     SubSelect,
     TableName,
-    Use
+    Use,
+    Program
 } from '@mammut-fe/hive-parser';
->>>>>>> bc1a604d110ec9a74a1ad8dde999cfcd6a831faa
-import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import {
     CompletionItem,
     CompletionItemKind,
@@ -300,7 +295,10 @@ export class HiveCompletion {
                     label: entry.name,
                     documentation: languageFacts.getEntryDescription(entry),
                     kind: CompletionItemKind.Text,
-                    textEdit: TextEdit.replace(this.getCompletionRange((node as TableName).identifier.dotNode), entry.name)
+                    textEdit: TextEdit.replace(
+                        this.getCompletionRange((node as TableName).identifier.dotNode),
+                        entry.name
+                    )
                 });
             }
         }
