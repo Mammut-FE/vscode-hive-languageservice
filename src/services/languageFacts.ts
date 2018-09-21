@@ -1,13 +1,14 @@
-import * as nls from 'vscode-nls';
+import { ICol, ICteTable } from '@mammut-fe/hive-parser';
+import { CompletionItemKind } from 'vscode-languageserver-types';
 import * as hiveData from '../data/hive';
 
 import mockDatabaseService from './mockDataBaseService';
 
-const localize = nls.loadMessageBundle();
-
 export interface Value {
     name: string;
     description: string;
+    kind: CompletionItemKind;
+    needComma: boolean;
 }
 
 export interface IEntry {
@@ -19,7 +20,6 @@ export interface IEntry {
 
 class ValueImpl implements Value {
     constructor(public data: any) {
-
     }
 
     get name(): string {
@@ -29,11 +29,18 @@ class ValueImpl implements Value {
     get description(): string {
         return this.data.desc || hiveData.descriptions[this.data.name];
     }
+
+    get kind(): CompletionItemKind {
+        return this.data.kind || CompletionItemKind.Text;
+    }
+
+    get needComma(): boolean {
+        return !!this.data.needComma;
+    }
 }
 
 class EntryImpl implements IEntry {
     constructor(public data: any) {
-
     }
 
     get name(): string {
@@ -62,7 +69,6 @@ class EntryImpl implements IEntry {
         return this.data.values.map(v => new ValueImpl(v));
     }
 }
-
 
 const keywords = hiveData.data.keywords;
 let keywordsList: IEntry[];
@@ -95,6 +101,106 @@ export function getFunctionsEntryList(): IEntry[] {
     return builtInFunctionEntryList;
 }
 
+const useStmtList = hiveData.data.use;
+let useStmtEntryList: IEntry[];
+
+export function getUseStmtEntryList() {
+    if (!useStmtEntryList) {
+        useStmtEntryList = [];
+        for (let i = 0; i < useStmtList.length; i++) {
+            let rawEntry = useStmtList[i];
+            useStmtEntryList.push(new EntryImpl(rawEntry));
+        }
+    }
+
+    return useStmtEntryList;
+}
+
+const selectStmtList = hiveData.data.select;
+let selectStmtEntryList: IEntry[];
+
+export function getSelectStmtEntryList() {
+    if (!selectStmtEntryList) {
+        selectStmtEntryList = [];
+        for (let i = 0; i < selectStmtList.length; i++) {
+            let rawEntry = selectStmtList[i];
+            selectStmtEntryList.push(new EntryImpl(rawEntry));
+        }
+    }
+
+    return selectStmtEntryList;
+}
+
+export function getDatabaseEntryList(): IEntry[] {
+    return mockDatabaseService.getDatabaseList().map(db => {
+        return new EntryImpl({
+            name: db.name
+        });
+    });
+}
+
+export function getTableEntryList(db: string): IEntry[] {
+    if (db) {
+        return mockDatabaseService.getTables(db).map(table => {
+            return new EntryImpl({
+                name: table.name
+            });
+        });
+    } else {
+        const result = mockDatabaseService
+            .getDatabaseList()
+            .map(db => {
+                if (db) {
+                    return db.tables.map(table => {
+                        return new EntryImpl({
+                            name: `${db.name}.${table.name}`
+                        });
+                    });
+                }
+            })
+            .filter(_ => _);
+
+        return result.reduce((prev, curr) => {
+            return prev.concat(curr);
+        }, []);
+    }
+}
+
+export function getColumnEntryList(dbName: string, tableName: string, columns: ICol[] = []): IEntry[] {
+    const cache = {};
+    let isAll = columns.length === 0;
+
+    columns.forEach(col => {
+        if (col.name === '*') {
+            isAll = true;
+        }
+        cache[col.name] = true;
+    });
+
+    const columnsList = mockDatabaseService
+        .getColumns(dbName, tableName)
+        .filter(column => {
+            return isAll || cache[column.name];
+        })
+        .map(column => {
+            return new EntryImpl({
+                name: column.name
+            });
+        });
+
+    columnsList.push(new EntryImpl({ name: '*' }));
+
+    return columnsList;
+}
+
+export function getCteTableEntryList(cteTables: ICteTable[]): IEntry[] {
+    return cteTables.map(cteTable => {
+        return new EntryImpl({
+            name: cteTable.name
+        });
+    });
+}
+
 export function getEntryDescription(entry: { description: string; data?: any }): string | null {
     if (!entry.description || entry.description === '') {
         return null;
@@ -108,12 +214,4 @@ export function getEntryDescription(entry: { description: string; data?: any }):
         desc += `\n\nSyntax: ${entry.data.syntax}`;
     }
     return desc;
-}
-
-export function getDatabaseEntryList(): IEntry[] {
-    return mockDatabaseService.getDatabaseList().map(name => {
-        return new EntryImpl({
-            name
-        });
-    });
 }

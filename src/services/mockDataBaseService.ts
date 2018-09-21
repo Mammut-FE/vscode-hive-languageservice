@@ -1,56 +1,55 @@
 export interface IDatabaseServices {
-    getDatabaseList(): string[];
+    getDatabaseList(): IDatabase[];
 
-    getTables(db: string): string[];
+    getTables(db: string): ITable[];
 
-    getColumns(db: string, table: string): string[];
+    getColumns(db: string, table: string): IColumn[];
 }
 
 export interface IDatabase {
-    id?: string | number | symbol;
-    desc?: string;
-    data?: any;
     name: string;
     tables: ITable[];
 }
 
 export interface ITable {
-    id?: string | number | symbol;
-    desc?: string;
-    data?: any;
     name: string;
-    db: string;
     columns: IColumn[];
 }
 
 export interface IColumn {
-    id?: string | number | symbol;
-    desc?: string;
-    data?: any;
     name: string;
-    table: string;
-    db: string;
 }
 
 export class MockDataBaseServicesImpl implements IDatabaseServices {
     constructor(public dbs: IDatabase[]) {
     }
 
-    public getDatabaseList(): string[] {
-        return this.dbs.map(db => db.name);
+    public getDatabaseList(): IDatabase[] {
+        return this.dbs.map(db => db);
     }
 
-    public getTables(db: string): string[] {
+    public getTables(db: string): ITable[] {
         const database = this.findDatabase(db);
 
-        return database.tables.map(table => table.name);
+        if (database) {
+            return database.tables.map(table => table);
+        }
+
+        return [];
     }
 
-    public getColumns(db: string, tableName: string): string[] {
+    public getColumns(db: string, tableName: string): IColumn[] {
         const database = this.findDatabase(db);
-        const table = this.findTable(database, tableName);
 
-        return table.columns.map(column => column.name);
+        if (database) {
+            const table = this.findTable(database, tableName);
+
+            if (table) {
+                return table.columns.map(column => column);
+            }
+        }
+
+        return [];
     }
 
     private findDatabase(dbName: string): IDatabase | null {
@@ -71,80 +70,50 @@ export class MockDataBaseServicesImpl implements IDatabaseServices {
 
 const mockDatabase: IDatabase[] = [
     {
-        name: 'db1',
+        name: 'school',
         tables: [
             {
-                name: 'db1-table1',
-                db: 'db1',
+                name: 'student',
                 columns: [{
-                    name: 'col1',
-                    table: 'db1-table1',
-                    db: 'db1'
+                    name: 'id'
                 }, {
-                    name: 'col1',
-                    table: 'db1-table1',
-                    db: 'db1'
+                    name: 'sex'
                 }, {
-                    name: 'col1',
-                    table: 'db1-table1',
-                    db: 'db1'
+                    name: 'age'
+                }, {
+                    name: 'name'
                 }]
             },
             {
-                name: 'db1-table1',
-                db: 'db1',
+                name: 'course',
                 columns: [{
-                    name: 'col1',
-                    table: 'db1-table1',
-                    db: 'db1'
+                    name: 'id'
                 }, {
-                    name: 'col1',
-                    table: 'db1-table1',
-                    db: 'db1'
+                    name: 'name'
                 }, {
-                    name: 'col1',
-                    table: 'db1-table1',
-                    db: 'db1'
+                    name: 'hour'
+                }, {
+                    name: 'score'
                 }]
             }
         ]
     },
     {
-        name: 'database2',
+        name: 'library',
         tables: [
             {
-                name: 'database2-table1',
-                db: 'database2',
-                columns: [{
-                    name: 'col1',
-                    table: 'database2-table1',
-                    db: 'database2'
-                }, {
-                    name: 'col1',
-                    table: 'database2-table1',
-                    db: 'database2'
-                }, {
-                    name: 'col1',
-                    table: 'database2-table1',
-                    db: 'database2'
-                }]
+                name: 'user',
+                columns: [
+                    { name: 'userid' },
+                    { name: 'password' }
+                ]
             },
             {
-                name: 'db2-table1',
-                db: 'db2',
-                columns: [{
-                    name: 'col1',
-                    table: 'db2-table1',
-                    db: 'db2'
-                }, {
-                    name: 'col1',
-                    table: 'db2-table1',
-                    db: 'db2'
-                }, {
-                    name: 'col1',
-                    table: 'db2-table1',
-                    db: 'db2'
-                }]
+                name: 'book',
+                columns: [
+                    { name: 'bookid' },
+                    { name: 'bookname' }
+                ]
             }
         ]
     }

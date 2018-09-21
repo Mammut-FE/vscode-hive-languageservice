@@ -11,5 +11,14 @@ module.exports = {
     mode: 'production',
     node: {
         fs: 'empty'
+    },
+    module: {
+        rules: [
+            {test: /\.tsx?$/, loader: 'ts-loader'}
+        ]
+    },
+    resolve: {
+        // Add `.ts` and `.tsx` as a resolvable extension.
+        extensions: ['.ts', '.tsx', '.js']
     }
 };

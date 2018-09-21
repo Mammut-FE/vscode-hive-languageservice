@@ -73,7 +73,15 @@ describe('Hive - Completion', () => {
         let document = TextDocument.create('test://test/test.hive', 'hive', 0, value);
         let position = Position.create(0, offset);
 
-        let jsonDoc = ls.parseProgram(document.getText());
+        let text = document.getText();
+        let wordAtOffset = text[offset - 1];
+
+        if (wordAtOffset === '.' || wordAtOffset === ',') {
+            text = text.substr(0, offset) + 'PLACEHOLDER' + text.substr(offset);
+        }
+
+        let jsonDoc = ls.parseProgram(text);
+
         let list = ls.doComplete(document, position, jsonDoc);
 
         if (typeof expected.count === 'number') {
@@ -96,14 +104,237 @@ describe('Hive - Completion', () => {
         testCompletionFor('use |', {
             items: [
                 {
-                    label: 'db1',
-                    resultText: 'use db1;'
+                    label: 'school',
+                    resultText: 'use school;'
                 },
                 {
-                    label: 'database2',
-                    resultText: 'use database2;'
+                    label: 'library',
+                    resultText: 'use library;'
+                },
+                {
+                    label: 'DEFAULT',
+                    resultText: 'use DEFAULT;'
                 }
             ]
         });
     });
+
+    test('Select: from clause', function(): any {
+        testCompletionFor('select * from |', {
+            items: [
+                {
+                    label: 'school.student',
+                    resultText: 'select * from school.student'
+                },
+                {
+                    label: 'library.book',
+                    resultText: 'select * from library.book'
+                }
+            ]
+        });
+
+        testCompletionFor('use school; select * from |', {
+            items: [
+                {
+                    label: 'student',
+                    resultText: 'use school; select * from student'
+                },
+                {
+                    label: 'course',
+                    resultText: 'use school; select * from course'
+                }
+            ]
+        });
+
+        testCompletionFor('select * from school.|', {
+            items: [
+                {
+                    label: 'student',
+                    resultText: 'select * from school.student'
+                },
+                {
+                    label: 'course',
+                    resultText: 'select * from school.course'
+                }
+            ]
+        });
+    });
+
+    test('Select: select_list clause', function(): any {
+        testCompletionFor('SELECT | FROM school.student', {
+            items: [
+                {
+                    label: 'name',
+                    resultText: 'SELECT name FROM school.student'
+                },
+                {
+                    label: 'id',
+                    resultText: 'SELECT id FROM school.student'
+                },
+                {
+                    label: '*',
+                    resultText: 'SELECT * FROM school.student'
+                }
+            ]
+        });
+
+        testCompletionFor('use school; select | from student', {
+            items: [
+                {
+                    label: 'name',
+                    resultText: 'use school; select name from student'
+                },
+                {
+                    label: 'id',
+                    resultText: 'use school; select id from student'
+                },
+                {
+                    label: '*',
+                    resultText: 'use school; select * from student'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT id, | FROM school.student', {
+            items: [
+                {
+                    label: 'name',
+                    resultText: 'SELECT id, name FROM school.student'
+                }
+            ]
+        });
+    });
+
+    test('Select: join clause', function() {
+        testCompletionFor('SELECT * FROM school.student t1, |', {
+            items: [
+                {
+                    label: 'library.user',
+                    resultText: 'SELECT * FROM school.student t1, library.user'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM school.student JOIN |', {
+            items: [
+                {
+                    label: 'school.course',
+                    resultText: 'SELECT * FROM school.student JOIN school.course'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM school.student LEFT JOIN |', {
+            items: [
+                {
+                    label: 'school.course',
+                    resultText: 'SELECT * FROM school.student LEFT JOIN school.course'
+                }
+            ]
+        });
+    });
+
+    test('Select: select_list clause with from clause alias', function(): any {
+        testCompletionFor('SELECT s.| FROM school.student s', {
+            items: [
+                {
+                    label: 'name',
+                    resultText: 'SELECT s.name FROM school.student s'
+                },
+                {
+                    label: 'id',
+                    resultText: 'SELECT s.id FROM school.student s'
+                },
+                {
+                    label: '*',
+                    resultText: 'SELECT s.* FROM school.student s'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT s.name, s.| FROM school.student s', {
+            items: [
+                {
+                    label: 'id',
+                    resultText: 'SELECT s.name, s.id FROM school.student s'
+                },
+                {
+                    label: '*',
+                    resultText: 'SELECT s.name, s.* FROM school.student s'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT s.name, c.| FROM school.student s, school.course c', {
+            items: [
+                {
+                    label: 'id',
+                    resultText: 'SELECT s.name, c.id FROM school.student s, school.course c'
+                },
+                {
+                    label: '*',
+                    resultText: 'SELECT s.name, c.* FROM school.student s, school.course c'
+                }
+            ]
+        });
+
+        testCompletionFor('use library; SELECT user.| FROM user JOIN book ON user.id = book.id', {
+            items: [
+                {
+                    label: 'userid',
+                    resultText: 'use library; SELECT user.userid FROM user JOIN book ON user.id = book.id'
+                },
+                {
+                    label: '*',
+                    resultText: 'use library; SELECT user.* FROM user JOIN book ON user.id = book.id'
+                }
+            ]
+        });
+    });
+
+    test('Select: cte select', function(): any {
+        testCompletionFor('with s as (select * from school.student) select * from |', {
+            items: [
+                {
+                    label: 's',
+                    resultText: 'with s as (select * from school.student) select * from s'
+                },
+                {
+                    label: 'school.course',
+                    resultText: 'with s as (select * from school.student) select * from school.course'
+                }
+            ]
+        });
+
+        testCompletionFor('with s as (select * from school.student) select | from s', {
+            items: [
+                {
+                    label: 'name',
+                    resultText: 'with s as (select * from school.student) select name from s'
+                },
+                {
+                    label: '*',
+                    resultText: 'with s as (select * from school.student) select * from s'
+                }
+            ]
+        });
+
+        testCompletionFor('with s as (select id, name from school.student) select | from s', {
+            items: [
+                {
+                    label: 'id',
+                    resultText: 'with s as (select id, name from school.student) select id from s'
+                },
+                {
+                    label: 'name',
+                    resultText: 'with s as (select id, name from school.student) select name from s'
+                },
+                {
+                    label: '*',
+                    resultText: 'with s as (select id, name from school.student) select * from s'
+                }
+            ]
+        });
+    });
+
 });
