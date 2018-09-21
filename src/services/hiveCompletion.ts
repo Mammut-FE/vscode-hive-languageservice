@@ -1,6 +1,6 @@
 import {
     Expr,
-    getPath,
+    getPath, ICol,
     Keyword,
     Node,
     NodeType,
@@ -66,7 +66,7 @@ export class HiveCompletion {
         return prev;
     }
 
-    private getCurrentDatabase(offset: number) {
+    private getCurrentDatabase(offset: number): string {
         const block = this.program.getBlockNode();
 
         const useNodes = block.getChildren().filter(node => {
@@ -81,11 +81,32 @@ export class HiveCompletion {
             }
         }
 
-        return '';
+        return null;
     }
 
     private getCurrentTableInfo(node: Node, str: string) {
         let [dbName, tableName] = str.split('.');
+        let columns: ICol[] = [];
+
+        const select = node.findParent(NodeType.Select) as Select;
+        const cteTables = select.getCteTables();
+
+        if (cteTables.length > 0) {
+            const rawTale = cteTables.filter(cteTable => {
+                return cteTable.name === dbName;
+            })[0];
+
+            if (rawTale) {
+                const { origin } = rawTale;
+                const fromTables = origin.getFromTables();
+
+                if (fromTables.length === 1) {
+                    [dbName, tableName] = (fromTables[0].rawTable as string).split('.');
+                }
+
+                columns = origin.getSelectCols();
+            }
+        }
 
         if (tableName === undefined) {
             tableName = dbName;
@@ -93,7 +114,7 @@ export class HiveCompletion {
         }
 
         return {
-            dbName, tableName
+            dbName, tableName, columns
         };
     }
 
@@ -349,9 +370,9 @@ export class HiveCompletion {
                 })[0];
 
                 if (rawTable) {
-                    const { dbName, tableName } = this.getCurrentTableInfo(node, rawTable as string);
+                    const { dbName, tableName, columns } = this.getCurrentTableInfo(node, rawTable as string);
 
-                    for (let entry of languageFacts.getColumnEntryList(dbName, tableName)) {
+                    for (let entry of languageFacts.getColumnEntryList(dbName, tableName, columns)) {
                         result.items.push({
                             label: entry.name,
                             documentation: languageFacts.getEntryDescription(entry),
@@ -374,9 +395,9 @@ export class HiveCompletion {
             });
 
             if (fromTable.length > 0) {
-                const { dbName, tableName } = this.getCurrentTableInfo(node, fromTable[0].aliasName);
+                const { dbName, tableName, columns } = this.getCurrentTableInfo(node, fromTable[0].aliasName);
 
-                for (let entry of languageFacts.getColumnEntryList(dbName, tableName)) {
+                for (let entry of languageFacts.getColumnEntryList(dbName, tableName, columns)) {
                     result.items.push({
                         label: entry.name,
                         documentation: languageFacts.getEntryDescription(entry),
@@ -416,8 +437,19 @@ export class HiveCompletion {
         return result;
     }
 
-    public getTableCompletionList(node: Node, result: CompletionList): CompletionList {
-        let currentDatabase = this.getCurrentDatabase(node.offset);
+    public getTableCompletionList(node: Select, result: CompletionList): CompletionList {
+        const cteTables = node.getCteTables();
+
+        for (let entry of languageFacts.getCteTableEntryList(cteTables)) {
+            result.items.push({
+                label: entry.name,
+                documentation: languageFacts.getEntryDescription(entry),
+                kind: CompletionItemKind.Text,
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+            });
+        }
+
+        const currentDatabase = this.getCurrentDatabase(node.offset);
 
         for (let entry of languageFacts.getTableEntryList(currentDatabase)) {
             result.items.push({

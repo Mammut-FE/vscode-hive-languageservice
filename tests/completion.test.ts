@@ -291,4 +291,50 @@ describe('Hive - Completion', () => {
             ]
         });
     });
+
+    test('Select: cte select', function(): any {
+        testCompletionFor('with s as (select * from school.student) select * from |', {
+            items: [
+                {
+                    label: 's',
+                    resultText: 'with s as (select * from school.student) select * from s'
+                },
+                {
+                    label: 'school.course',
+                    resultText: 'with s as (select * from school.student) select * from school.course'
+                }
+            ]
+        });
+
+        testCompletionFor('with s as (select * from school.student) select | from s', {
+            items: [
+                {
+                    label: 'name',
+                    resultText: 'with s as (select * from school.student) select name from s'
+                },
+                {
+                    label: '*',
+                    resultText: 'with s as (select * from school.student) select * from s'
+                }
+            ]
+        });
+
+        testCompletionFor('with s as (select id, name from school.student) select | from s', {
+            items: [
+                {
+                    label: 'id',
+                    resultText: 'with s as (select id, name from school.student) select id from s'
+                },
+                {
+                    label: 'name',
+                    resultText: 'with s as (select id, name from school.student) select name from s'
+                },
+                {
+                    label: '*',
+                    resultText: 'with s as (select id, name from school.student) select * from s'
+                }
+            ]
+        });
+    });
+
 });
