@@ -1,9 +1,10 @@
 {
   "name": "vscode-hive-languageservice",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "",
   "main": "lib/umd/hiveLanguageService.js",
   "module": "lib/esm/hiveLanguageService.js",
+  "files": ["lib"],
   "keywords": [],
   "author": "lleohao <lleohao@hotmail.com>",
   "license": "Apache-2.0",
