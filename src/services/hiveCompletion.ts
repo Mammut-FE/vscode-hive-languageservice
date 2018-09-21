@@ -1,4 +1,19 @@
+<<<<<<< HEAD
 import { Expr, getPath, Keyword, Node, NodeType, Select, SubSelect, TableName, Use } from '@mammut-fe/hive-parser';
+=======
+import {
+    Expr,
+    getPath,
+    Identifier,
+    Keyword,
+    Node,
+    NodeType,
+    Select,
+    SubSelect,
+    TableName,
+    Use
+} from '@mammut-fe/hive-parser';
+>>>>>>> bc1a604d110ec9a74a1ad8dde999cfcd6a831faa
 import { Program } from '@mammut-fe/hive-parser/lib/nodes';
 import {
     CompletionItem,
