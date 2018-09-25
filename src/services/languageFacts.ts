@@ -2,7 +2,9 @@ import { ICol, ICteTable } from '@mammut-fe/hive-parser';
 import { CompletionItemKind } from 'vscode-languageserver-types';
 import * as hiveData from '../data/hive';
 
-import mockDatabaseService from './mockDataBaseService';
+import { getDatabaseService } from './databaseService';
+
+const databaseService = getDatabaseService();
 
 export interface Value {
     name: string;
@@ -132,7 +134,7 @@ export function getSelectStmtEntryList() {
 }
 
 export function getDatabaseEntryList(): IEntry[] {
-    return mockDatabaseService.getDatabaseList().map(db => {
+    return databaseService.getDatabaseList().map(db => {
         return new EntryImpl({
             name: db.name
         });
@@ -141,13 +143,13 @@ export function getDatabaseEntryList(): IEntry[] {
 
 export function getTableEntryList(db: string): IEntry[] {
     if (db) {
-        return mockDatabaseService.getTables(db).map(table => {
+        return databaseService.getTables(db).map(table => {
             return new EntryImpl({
                 name: table.name
             });
         });
     } else {
-        const result = mockDatabaseService
+        const result = databaseService
             .getDatabaseList()
             .map(db => {
                 if (db) {
@@ -177,7 +179,7 @@ export function getColumnEntryList(dbName: string, tableName: string, columns: I
         cache[col.name] = true;
     });
 
-    const columnsList = mockDatabaseService
+    const columnsList = databaseService
         .getColumns(dbName, tableName)
         .filter(column => {
             return isAll || cache[column.name];

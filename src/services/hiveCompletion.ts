@@ -20,7 +20,8 @@ import {
     TextDocument,
     TextEdit
 } from 'vscode-languageserver-types';
-import { ICompletionParticipant } from '../hiveLanguageTypes';
+import { ICompletionParticipant, IDatabase } from '../hiveLanguageTypes';
+import { updateDatabase } from './databaseService';
 import * as languageFacts from './languageFacts';
 
 const SnippetFormat = InsertTextFormat.Snippet;
@@ -118,7 +119,7 @@ export class HiveCompletion {
         };
     }
 
-    public doComplete(document: TextDocument, position: Position, program: Program): CompletionList {
+    public doComplete(document: TextDocument, position: Position, program: Program, databases?: IDatabase[]): CompletionList {
         this.offset = document.offsetAt(position);
         this.position = position;
         this.currentWord = getCurrentWord(document, this.offset);
@@ -128,6 +129,11 @@ export class HiveCompletion {
         );
         this.textDocument = document;
         this.program = program;
+
+        if (databases) {
+            updateDatabase(databases);
+        }
+
         try {
             let result: CompletionList = { isIncomplete: false, items: [] };
             this.nodePath = getPath(this.program, this.offset);
