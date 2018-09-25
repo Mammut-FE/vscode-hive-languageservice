@@ -3,7 +3,6 @@ import { CompletionList, Diagnostic, Position, TextDocument } from 'vscode-langu
 import { Parser, Program } from '@mammut-fe/hive-parser';
 import { HiveCompletion } from './services/hiveCompletion';
 
-
 export interface LanguageService {
     doValidation(text: string): Promise<Diagnostic[]>;
 
