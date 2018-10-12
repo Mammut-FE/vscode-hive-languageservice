@@ -105,6 +105,23 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'school',
+                    resultText: 'use school'
+                },
+                {
+                    label: 'library',
+                    resultText: 'use library'
+                },
+                {
+                    label: 'DEFAULT',
+                    resultText: 'use DEFAULT'
+                }
+            ]
+        });
+
+        testCompletionFor('use |;', {
+            items: [
+                {
+                    label: 'school',
                     resultText: 'use school;'
                 },
                 {

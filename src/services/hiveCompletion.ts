@@ -1,6 +1,7 @@
 import {
     Expr,
-    getPath, ICol,
+    getPath,
+    ICol,
     Keyword,
     Node,
     NodeType,
@@ -67,6 +68,18 @@ export class HiveCompletion {
         return prev;
     }
 
+    private findBeforeSemicolonExpr(node: Node): Node {
+        let offset = node.offset - 1;
+        let prev = this.program.findFirstChildBeforeOffset(offset);
+
+        while (prev.type !== NodeType.Expr) {
+            offset = prev.offset - 1;
+            prev = this.program.findChildAtOffset(offset, true);
+        }
+
+        return prev;
+    }
+
     private getCurrentDatabase(offset: number): string {
         const block = this.program.getBlockNode();
 
@@ -115,11 +128,18 @@ export class HiveCompletion {
         }
 
         return {
-            dbName, tableName, columns
+            dbName,
+            tableName,
+            columns
         };
     }
 
-    public doComplete(document: TextDocument, position: Position, program: Program, databases?: IDatabase[]): CompletionList {
+    public doComplete(
+        document: TextDocument,
+        position: Position,
+        program: Program,
+        databases?: IDatabase[]
+    ): CompletionList {
         this.offset = document.offsetAt(position);
         this.position = position;
         this.currentWord = getCurrentWord(document, this.offset);
@@ -152,6 +172,8 @@ export class HiveCompletion {
                     this.getCompletionsForExpr(node as Expr, result);
                 } else if (node.type === NodeType.Keyword) {
                     this.getCompletionsForKeywords(node as Keyword, result);
+                } else if (node.type === NodeType.Semicolon) {
+                    this.getCompletionsSemicolon(node, result);
                 } else if (node.parent === null) {
                     this.getCompletionForTopLevel(result);
                 } else {
@@ -204,10 +226,6 @@ export class HiveCompletion {
                         insertString = insertString.substr(0, from) + '($1)';
                         insertTextFormat = SnippetFormat;
                     }
-                }
-
-                if (value.needComma) {
-                    insertString = insertString + ';';
                 }
 
                 let item: CompletionItem = {
@@ -331,7 +349,7 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name + ';')
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
             });
         }
 
@@ -465,6 +483,14 @@ export class HiveCompletion {
                 textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
             });
         }
+
+        return result;
+    }
+
+    private getCompletionsSemicolon(node: Node, result: CompletionList): CompletionList {
+        const prevNode = this.findBeforeSemicolonExpr(node);
+
+        this.getCompletionsForExpr(prevNode as Expr, result);
 
         return result;
     }

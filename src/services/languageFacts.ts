@@ -10,7 +10,6 @@ export interface Value {
     name: string;
     description: string;
     kind: CompletionItemKind;
-    needComma: boolean;
 }
 
 export interface IEntry {
