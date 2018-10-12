@@ -6,7 +6,8 @@ module.exports = {
         path: path.resolve(__dirname, '../lib/esm'),
         library: 'hiveLanguageService',
         filename: 'hiveLanguageService.js',
-        globalObject: "this"
+        libraryTarget: 'umd2',
+        globalObject: "this",
     },
     mode: 'production',
     node: {
