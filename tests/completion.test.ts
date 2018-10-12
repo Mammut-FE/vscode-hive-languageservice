@@ -1,13 +1,12 @@
-import * as hiveLanguageService from '../src/hiveLanguageService';
-import * as hiveData from '../src/data/hive';
-
 import {
-    CompletionList,
-    TextDocument,
-    Position,
     CompletionItemKind,
-    InsertTextFormat
+    CompletionList,
+    InsertTextFormat,
+    Position,
+    TextDocument
 } from 'vscode-languageserver-types';
+import * as hiveData from '../src/data/hive';
+import * as hiveLanguageService from '../src/hiveLanguageService';
 
 export interface ItemDescription {
     label: string;
@@ -105,15 +104,38 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'school',
-                    resultText: 'use school;'
+                    resultText: 'use school',
+                    detail: 'database'
                 },
                 {
                     label: 'library',
-                    resultText: 'use library;'
+                    resultText: 'use library',
+                    detail: 'database'
                 },
                 {
                     label: 'DEFAULT',
-                    resultText: 'use DEFAULT;'
+                    resultText: 'use DEFAULT',
+                    detail: 'keyword'
+                }
+            ]
+        });
+
+        testCompletionFor('use |;', {
+            items: [
+                {
+                    label: 'school',
+                    resultText: 'use school;',
+                    detail: 'database'
+                },
+                {
+                    label: 'library',
+                    resultText: 'use library;',
+                    detail: 'database'
+                },
+                {
+                    label: 'DEFAULT',
+                    resultText: 'use DEFAULT;',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -124,11 +146,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'school.student',
-                    resultText: 'select * from school.student'
+                    resultText: 'select * from school.student',
+                    detail: 'table'
                 },
                 {
                     label: 'library.book',
-                    resultText: 'select * from library.book'
+                    resultText: 'select * from library.book',
+                    detail: 'table'
                 }
             ]
         });
@@ -137,11 +161,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'student',
-                    resultText: 'use school; select * from student'
+                    resultText: 'use school; select * from student',
+                    detail: 'table'
                 },
                 {
                     label: 'course',
-                    resultText: 'use school; select * from course'
+                    resultText: 'use school; select * from course',
+                    detail: 'table'
                 }
             ]
         });
@@ -150,11 +176,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'student',
-                    resultText: 'select * from school.student'
+                    resultText: 'select * from school.student',
+                    detail: 'table'
                 },
                 {
                     label: 'course',
-                    resultText: 'select * from school.course'
+                    resultText: 'select * from school.course',
+                    detail: 'table'
                 }
             ]
         });
@@ -165,15 +193,18 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'name',
-                    resultText: 'SELECT name FROM school.student'
+                    resultText: 'SELECT name FROM school.student',
+                    detail: 'column'
                 },
                 {
                     label: 'id',
-                    resultText: 'SELECT id FROM school.student'
+                    resultText: 'SELECT id FROM school.student',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'SELECT * FROM school.student'
+                    resultText: 'SELECT * FROM school.student',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -182,15 +213,18 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'name',
-                    resultText: 'use school; select name from student'
+                    resultText: 'use school; select name from student',
+                    detail: 'column'
                 },
                 {
                     label: 'id',
-                    resultText: 'use school; select id from student'
+                    resultText: 'use school; select id from student',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'use school; select * from student'
+                    resultText: 'use school; select * from student',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -199,7 +233,8 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'name',
-                    resultText: 'SELECT id, name FROM school.student'
+                    resultText: 'SELECT id, name FROM school.student',
+                    detail: 'column'
                 }
             ]
         });
@@ -210,7 +245,8 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'library.user',
-                    resultText: 'SELECT * FROM school.student t1, library.user'
+                    resultText: 'SELECT * FROM school.student t1, library.user',
+                    detail: 'table'
                 }
             ]
         });
@@ -219,7 +255,8 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'school.course',
-                    resultText: 'SELECT * FROM school.student JOIN school.course'
+                    resultText: 'SELECT * FROM school.student JOIN school.course',
+                    detail: 'table'
                 }
             ]
         });
@@ -228,7 +265,8 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'school.course',
-                    resultText: 'SELECT * FROM school.student LEFT JOIN school.course'
+                    resultText: 'SELECT * FROM school.student LEFT JOIN school.course',
+                    detail: 'table'
                 }
             ]
         });
@@ -239,15 +277,18 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'name',
-                    resultText: 'SELECT s.name FROM school.student s'
+                    resultText: 'SELECT s.name FROM school.student s',
+                    detail: 'column'
                 },
                 {
                     label: 'id',
-                    resultText: 'SELECT s.id FROM school.student s'
+                    resultText: 'SELECT s.id FROM school.student s',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'SELECT s.* FROM school.student s'
+                    resultText: 'SELECT s.* FROM school.student s',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -256,11 +297,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'id',
-                    resultText: 'SELECT s.name, s.id FROM school.student s'
+                    resultText: 'SELECT s.name, s.id FROM school.student s',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'SELECT s.name, s.* FROM school.student s'
+                    resultText: 'SELECT s.name, s.* FROM school.student s',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -269,11 +312,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'id',
-                    resultText: 'SELECT s.name, c.id FROM school.student s, school.course c'
+                    resultText: 'SELECT s.name, c.id FROM school.student s, school.course c',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'SELECT s.name, c.* FROM school.student s, school.course c'
+                    resultText: 'SELECT s.name, c.* FROM school.student s, school.course c',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -282,11 +327,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'userid',
-                    resultText: 'use library; SELECT user.userid FROM user JOIN book ON user.id = book.id'
+                    resultText: 'use library; SELECT user.userid FROM user JOIN book ON user.id = book.id',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'use library; SELECT user.* FROM user JOIN book ON user.id = book.id'
+                    resultText: 'use library; SELECT user.* FROM user JOIN book ON user.id = book.id',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -297,11 +344,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 's',
-                    resultText: 'with s as (select * from school.student) select * from s'
+                    resultText: 'with s as (select * from school.student) select * from s',
+                    detail: 'table'
                 },
                 {
                     label: 'school.course',
-                    resultText: 'with s as (select * from school.student) select * from school.course'
+                    resultText: 'with s as (select * from school.student) select * from school.course',
+                    detail: 'table'
                 }
             ]
         });
@@ -310,11 +359,13 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'name',
-                    resultText: 'with s as (select * from school.student) select name from s'
+                    resultText: 'with s as (select * from school.student) select name from s',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'with s as (select * from school.student) select * from s'
+                    resultText: 'with s as (select * from school.student) select * from s',
+                    detail: 'keyword'
                 }
             ]
         });
@@ -323,15 +374,18 @@ describe('Hive - Completion', () => {
             items: [
                 {
                     label: 'id',
-                    resultText: 'with s as (select id, name from school.student) select id from s'
+                    resultText: 'with s as (select id, name from school.student) select id from s',
+                    detail: 'column'
                 },
                 {
                     label: 'name',
-                    resultText: 'with s as (select id, name from school.student) select name from s'
+                    resultText: 'with s as (select id, name from school.student) select name from s',
+                    detail: 'column'
                 },
                 {
                     label: '*',
-                    resultText: 'with s as (select id, name from school.student) select * from s'
+                    resultText: 'with s as (select id, name from school.student) select * from s',
+                    detail: 'keyword'
                 }
             ]
         });

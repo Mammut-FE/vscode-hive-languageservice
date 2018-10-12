@@ -10,7 +10,7 @@ export interface Value {
     name: string;
     description: string;
     kind: CompletionItemKind;
-    needComma: boolean;
+    detail?: string;
 }
 
 export interface IEntry {
@@ -18,6 +18,7 @@ export interface IEntry {
     restrictions: string[];
     description: string;
     values: Value[];
+    detail?: string;
 }
 
 class ValueImpl implements Value {
@@ -38,6 +39,10 @@ class ValueImpl implements Value {
 
     get needComma(): boolean {
         return !!this.data.needComma;
+    }
+
+    get detail(): string {
+        return this.data.detail;
     }
 }
 
@@ -69,6 +74,10 @@ class EntryImpl implements IEntry {
             return [new ValueImpl(this.data.values.value)];
         }
         return this.data.values.map(v => new ValueImpl(v));
+    }
+
+    get detail(): string {
+        return this.data.detail;
     }
 }
 
@@ -136,7 +145,8 @@ export function getSelectStmtEntryList() {
 export function getDatabaseEntryList(): IEntry[] {
     return databaseService.getDatabaseList().map(db => {
         return new EntryImpl({
-            name: db.name
+            name: db.name,
+            detail: 'database'
         });
     });
 }
@@ -145,7 +155,8 @@ export function getTableEntryList(db: string): IEntry[] {
     if (db) {
         return databaseService.getTables(db).map(table => {
             return new EntryImpl({
-                name: table.name
+                name: table.name,
+                detail: 'table'
             });
         });
     } else {
@@ -155,7 +166,8 @@ export function getTableEntryList(db: string): IEntry[] {
                 if (db) {
                     return db.tables.map(table => {
                         return new EntryImpl({
-                            name: `${db.name}.${table.name}`
+                            name: `${db.name}.${table.name}`,
+                            detail: 'table'
                         });
                     });
                 }
@@ -186,11 +198,12 @@ export function getColumnEntryList(dbName: string, tableName: string, columns: I
         })
         .map(column => {
             return new EntryImpl({
-                name: column.name
+                name: column.name,
+                detail: 'column'
             });
         });
 
-    columnsList.push(new EntryImpl({ name: '*' }));
+    columnsList.push(new EntryImpl({ name: '*', detail: 'keyword' }));
 
     return columnsList;
 }
@@ -198,7 +211,8 @@ export function getColumnEntryList(dbName: string, tableName: string, columns: I
 export function getCteTableEntryList(cteTables: ICteTable[]): IEntry[] {
     return cteTables.map(cteTable => {
         return new EntryImpl({
-            name: cteTable.name
+            name: cteTable.name,
+            detail: 'table'
         });
     });
 }

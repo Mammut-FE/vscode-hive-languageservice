@@ -12,7 +12,7 @@ export const data: any = {
                     name: 'DEFAULT',
                     desc: 'HiveQL default database.',
                     kind: CompletionItemKind.Keyword,
-                    needComma: true
+                    detail: 'keyword'
                 }
             ]
         }
@@ -27,11 +27,12 @@ export const data: any = {
                     name: 'current_database()',
                     desc: 'HiveQL default database.',
                     kind: CompletionItemKind.Keyword,
-                    needComma: true
+                    detail: 'function'
                 },
                 {
                     name: '*',
-                    kind: CompletionItemKind.Value
+                    kind: CompletionItemKind.Value,
+                    detail: 'keyword'
                 }
             ]
         }
