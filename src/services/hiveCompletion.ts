@@ -70,7 +70,7 @@ export class HiveCompletion {
 
     private findBeforeSemicolonExpr(node: Node): Node {
         let offset = node.offset - 1;
-        let prev = this.program.findFirstChildBeforeOffset(offset);
+        let prev = this.program.findChildAtOffset(offset, true);
 
         while (prev.type !== NodeType.Expr) {
             offset = prev.offset - 1;
@@ -234,7 +234,8 @@ export class HiveCompletion {
                     textEdit: TextEdit.replace(this.getCompletionRange(existingNode), insertString),
                     kind: value.kind,
                     insertTextFormat,
-                    sortText: 'z'
+                    sortText: 'z',
+                    detail: value.detail
                 };
                 result.items.push(item);
             }
@@ -282,7 +283,8 @@ export class HiveCompletion {
             result.items.push({
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
-                kind: CompletionItemKind.Function
+                kind: CompletionItemKind.Function,
+                detail: entry.detail
             });
         }
 
@@ -301,7 +303,8 @@ export class HiveCompletion {
                 result.items.push({
                     label: entry.name,
                     documentation: languageFacts.getEntryDescription(entry),
-                    kind: CompletionItemKind.Keyword
+                    kind: CompletionItemKind.Keyword,
+                    detail: 'keyword'
                 });
             }
         }
@@ -349,7 +352,8 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                detail: entry.detail
             });
         }
 
@@ -376,7 +380,8 @@ export class HiveCompletion {
                     textEdit: TextEdit.replace(
                         this.getCompletionRange((node as TableName).identifier.dotNode),
                         entry.name
-                    )
+                    ),
+                    detail: entry.detail
                 });
             }
         }
@@ -401,7 +406,8 @@ export class HiveCompletion {
                             label: entry.name,
                             documentation: languageFacts.getEntryDescription(entry),
                             kind: CompletionItemKind.Text,
-                            textEdit: TextEdit.replace(this.getCompletionRange(node), entry.name)
+                            textEdit: TextEdit.replace(this.getCompletionRange(node), entry.name),
+                            detail: entry.detail
                         });
                     }
                 }
@@ -426,7 +432,8 @@ export class HiveCompletion {
                         label: entry.name,
                         documentation: languageFacts.getEntryDescription(entry),
                         kind: CompletionItemKind.Text,
-                        textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+                        textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                        detail: entry.detail
                     });
                 }
             }
@@ -469,7 +476,8 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                detail: entry.detail
             });
         }
 
@@ -480,7 +488,8 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name)
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                detail: entry.detail
             });
         }
 
