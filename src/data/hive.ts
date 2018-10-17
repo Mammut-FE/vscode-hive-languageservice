@@ -4,12 +4,12 @@ import { CompletionItemKind } from 'vscode-languageserver-types';
 export const data: any = {
     use: [
         {
-            name: 'USE',
+            name: 'use',
             desc: 'USE sets the current database for all subsequent HiveQL statements.',
             restriction: 'string',
             values: [
                 {
-                    name: 'DEFAULT',
+                    name: 'default',
                     desc: 'HiveQL default database.',
                     kind: CompletionItemKind.Keyword,
                     detail: 'keyword'
@@ -19,7 +19,7 @@ export const data: any = {
     ],
     select: [
         {
-            name: 'SELECT',
+            name: 'select',
             decs: '',
             restriction: 'function',
             values: [

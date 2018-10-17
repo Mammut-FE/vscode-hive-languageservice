@@ -234,7 +234,7 @@ export class HiveCompletion {
                     textEdit: TextEdit.replace(this.getCompletionRange(existingNode), insertString),
                     kind: value.kind,
                     insertTextFormat,
-                    sortText: 'z',
+                    sortText: 'a',
                     detail: value.detail
                 };
                 result.items.push(item);
@@ -284,7 +284,8 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Function,
-                detail: entry.detail
+                detail: 'function',
+                sortText: 'c'
             });
         }
 
@@ -304,7 +305,8 @@ export class HiveCompletion {
                     label: entry.name,
                     documentation: languageFacts.getEntryDescription(entry),
                     kind: CompletionItemKind.Keyword,
-                    detail: 'keyword'
+                    detail: 'keyword',
+                    sortText: 'b'
                 });
             }
         }
@@ -353,7 +355,8 @@ export class HiveCompletion {
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
                 textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                detail: entry.detail
+                detail: entry.detail,
+                sortText: 'a'
             });
         }
 
@@ -381,7 +384,8 @@ export class HiveCompletion {
                         this.getCompletionRange((node as TableName).identifier.dotNode),
                         entry.name
                     ),
-                    detail: entry.detail
+                    detail: entry.detail,
+                    sortText: 'a'
                 });
             }
         }
@@ -407,7 +411,8 @@ export class HiveCompletion {
                             documentation: languageFacts.getEntryDescription(entry),
                             kind: CompletionItemKind.Text,
                             textEdit: TextEdit.replace(this.getCompletionRange(node), entry.name),
-                            detail: entry.detail
+                            detail: entry.detail,
+                            sortText: 'a'
                         });
                     }
                 }
@@ -433,7 +438,8 @@ export class HiveCompletion {
                         documentation: languageFacts.getEntryDescription(entry),
                         kind: CompletionItemKind.Text,
                         textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                        detail: entry.detail
+                        detail: entry.detail,
+                        sortText: 'a'
                     });
                 }
             }
@@ -477,7 +483,8 @@ export class HiveCompletion {
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
                 textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                detail: entry.detail
+                detail: entry.detail,
+                sortText: 'a'
             });
         }
 
@@ -489,7 +496,8 @@ export class HiveCompletion {
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Text,
                 textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                detail: entry.detail
+                detail: entry.detail,
+                sortText: 'a'
             });
         }
 

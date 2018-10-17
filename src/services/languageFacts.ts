@@ -89,6 +89,7 @@ export function getKeywordEntryList() {
         keywordsList = [];
         for (let i = 0; i < keywords.length; i++) {
             let rawEntry = keywords[i];
+            rawEntry.name = rawEntry.name.toLowerCase();
             keywordsList.push(new EntryImpl(rawEntry));
         }
     }
