@@ -285,7 +285,7 @@ export class HiveCompletion {
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Function,
                 detail: 'function',
-                sortText: 'c'
+                sortText: 'j'
             });
         }
 
@@ -306,7 +306,7 @@ export class HiveCompletion {
                     documentation: languageFacts.getEntryDescription(entry),
                     kind: CompletionItemKind.Keyword,
                     detail: 'keyword',
-                    sortText: 'b'
+                    sortText: 'k'
                 });
             }
         }
