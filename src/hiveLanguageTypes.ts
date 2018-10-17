@@ -11,6 +11,12 @@ export interface IDatabaseServices {
     getTables(db: string): ITable[];
 
     getColumns(db: string, table: string): IColumn[];
+
+    findDatabase(db: string): IDatabase | null;
+
+    findTable(db: string, table: string): ITable | null;
+
+    findColumn(db: string, table: string, col: string): IColumn | null;
 }
 
 export interface IDatabase {

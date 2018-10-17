@@ -321,6 +321,22 @@ export class HiveCompletion {
             if (node.parent.type === NodeType.SelectListItem) {
                 const [aliasName] = exprText.split('.');
                 this.getCompletionsForSelectList(node, result, aliasName);
+            } else {
+                const [dbName] = exprText.split('.');
+
+                for (let entry of languageFacts.getTableEntryList(dbName)) {
+                    result.items.push({
+                        label: entry.name,
+                        documentation: languageFacts.getEntryDescription(entry),
+                        kind: CompletionItemKind.Text,
+                        textEdit: TextEdit.replace(
+                            this.getCompletionRange(node),
+                            entry.name
+                        ),
+                        detail: entry.detail,
+                        sortText: 'a'
+                    });
+                }
             }
         } else {
             switch (node.getText().toLowerCase()) {
@@ -364,15 +380,12 @@ export class HiveCompletion {
     }
 
     public getCompletionsForFrom(node: Node, result: CompletionList): CompletionList {
-        if (node.type === NodeType.Expr) {
-            let prev = this.findBeforeExprNode(node);
+        if (node.type === NodeType.TableName) {
+            /**
+             * select * from db.|
+             * 优先提示 db 对应的表
+             */
 
-            let selectNode = prev.findParent(NodeType.Select) as Select;
-
-            if (selectNode) {
-                this.getTableCompletionList(selectNode, result);
-            }
-        } else if (node.type === NodeType.TableName) {
             let [db] = (node as TableName).getTableName().split('.');
 
             for (let entry of languageFacts.getTableEntryList(db)) {
@@ -387,6 +400,19 @@ export class HiveCompletion {
                     detail: entry.detail,
                     sortText: 'a'
                 });
+            }
+        } else if (node.type === NodeType.Expr) {
+            /**
+             * select * from |
+             * 依次提示 cte_table, use db, 所有的 db
+             */
+
+            const prev = this.findBeforeExprNode(node);
+
+            const selectNode = prev.findParent(NodeType.Select) as Select;
+
+            if (selectNode) {
+                this.getTableCompletionList(selectNode, result);
             }
         }
 
@@ -481,7 +507,7 @@ export class HiveCompletion {
             result.items.push({
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
-                kind: CompletionItemKind.Text,
+                kind: CompletionItemKind.Variable,
                 textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
                 detail: entry.detail,
                 sortText: 'a'
@@ -497,7 +523,18 @@ export class HiveCompletion {
                 kind: CompletionItemKind.Text,
                 textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
                 detail: entry.detail,
-                sortText: 'a'
+                sortText: 'b'
+            });
+        }
+
+        for (let entry of languageFacts.getDatabaseEntryList()) {
+            result.items.push({
+                label: entry.name,
+                documentation: languageFacts.getEntryDescription(entry),
+                kind: CompletionItemKind.Text,
+                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                detail: entry.detail,
+                sortText: 'c'
             });
         }
 

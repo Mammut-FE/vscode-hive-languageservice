@@ -1,4 +1,4 @@
-import { IColumn, IDatabase, IDatabaseServices, ITable } from '../hiveLanguageTypes';
+import { IColumn, IDatabase, ITable } from '../hiveLanguageTypes';
 
 let dbs: IDatabase[] = [
     {
@@ -50,9 +50,9 @@ let dbs: IDatabase[] = [
         ]
     }
 ];
-let databaseServiceImpl: IDatabaseServices = null;
+let databaseServiceImpl: DataBaseServices = null;
 
-export class DataBaseServicesImpl implements IDatabaseServices {
+export class DataBaseServices {
     public getDatabaseList(): IDatabase[] {
         return dbs.map(db => db);
     }
@@ -67,32 +67,36 @@ export class DataBaseServicesImpl implements IDatabaseServices {
         return [];
     }
 
-    public getColumns(db: string, tableName: string): IColumn[] {
-        const database = this.findDatabase(db);
+    public getColumns(dbName: string, tableName: string): IColumn[] {
+        const table = this.findTable(dbName, tableName);
 
-        if (database) {
-            const table = this.findTable(database, tableName);
-
-            if (table) {
-                return table.columns.map(column => column);
-            }
+        if (table) {
+            return table.columns.map(column => column);
         }
 
         return [];
     }
 
-    private findDatabase(dbName: string): IDatabase | null {
+    public findDatabase(dbName: string): IDatabase | null {
         let result = dbs.filter(db => db.name === dbName);
         return result.length > 0 ? result[0] : null;
     }
 
-    private findTable(db: IDatabase, tableName: string): ITable | null {
-        let result = db.tables.filter(table => table.name === tableName);
+    public findTable(dbName: string, tableName: string): ITable | null {
+        const db = this.findDatabase(dbName);
+
+        if (!db) return null;
+
+        const result = db.tables.filter(table => table.name === tableName);
         return result.length > 0 ? result[0] : null;
     }
 
-    private findColumn(table: ITable, columnName: string): IColumn | null {
-        let result = table.columns.filter(column => column.name === columnName);
+    public findColumn(dbName: string, tableName: string, colName: string): IColumn | null {
+        const table = this.findTable(dbName, tableName);
+
+        if (!table) return null;
+
+        const result = table.columns.filter(col => col.name === colName);
         return result.length > 0 ? result[0] : null;
     }
 }
@@ -103,7 +107,7 @@ export function updateDatabase(database: IDatabase[]): void {
 
 export function getDatabaseService() {
     if (!databaseServiceImpl) {
-        databaseServiceImpl = new DataBaseServicesImpl();
+        databaseServiceImpl = new DataBaseServices();
     }
 
     return databaseServiceImpl;

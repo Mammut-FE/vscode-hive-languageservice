@@ -113,8 +113,8 @@ describe('Hive - Completion', () => {
                     detail: 'database'
                 },
                 {
-                    label: 'DEFAULT',
-                    resultText: 'use DEFAULT',
+                    label: 'default',
+                    resultText: 'use default',
                     detail: 'keyword'
                 }
             ]
@@ -145,14 +145,14 @@ describe('Hive - Completion', () => {
         testCompletionFor('select * from |', {
             items: [
                 {
-                    label: 'school.student',
-                    resultText: 'select * from school.student',
-                    detail: 'table'
+                    label: 'school',
+                    resultText: 'select * from school',
+                    detail: 'database'
                 },
                 {
-                    label: 'library.book',
-                    resultText: 'select * from library.book',
-                    detail: 'table'
+                    label: 'library',
+                    resultText: 'select * from library',
+                    detail: 'database'
                 }
             ]
         });
@@ -168,6 +168,16 @@ describe('Hive - Completion', () => {
                     label: 'course',
                     resultText: 'use school; select * from course',
                     detail: 'table'
+                },
+                {
+                    label: 'school',
+                    resultText: 'use school; select * from school',
+                    detail: 'database'
+                },
+                {
+                    label: 'library',
+                    resultText: 'use school; select * from library',
+                    detail: 'database'
                 }
             ]
         });
@@ -244,7 +254,17 @@ describe('Hive - Completion', () => {
         testCompletionFor('SELECT * FROM school.student t1, |', {
             items: [
                 {
-                    label: 'library.user',
+                    label: 'library',
+                    resultText: 'SELECT * FROM school.student t1, library',
+                    detail: 'database'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM school.student t1, library.|', {
+            items: [
+                {
+                    label: 'user',
                     resultText: 'SELECT * FROM school.student t1, library.user',
                     detail: 'table'
                 }
@@ -254,8 +274,18 @@ describe('Hive - Completion', () => {
         testCompletionFor('SELECT * FROM school.student JOIN |', {
             items: [
                 {
-                    label: 'school.course',
-                    resultText: 'SELECT * FROM school.student JOIN school.course',
+                    label: 'school',
+                    resultText: 'SELECT * FROM school.student JOIN school',
+                    detail: 'database'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM school.student JOIN school.|', {
+            items: [
+                {
+                    label: 'student',
+                    resultText: 'SELECT * FROM school.student JOIN school.student',
                     detail: 'table'
                 }
             ]
@@ -264,7 +294,17 @@ describe('Hive - Completion', () => {
         testCompletionFor('SELECT * FROM school.student LEFT JOIN |', {
             items: [
                 {
-                    label: 'school.course',
+                    label: 'school',
+                    resultText: 'SELECT * FROM school.student LEFT JOIN school',
+                    detail: 'database'
+                }
+            ]
+        });
+
+        testCompletionFor('SELECT * FROM school.student LEFT JOIN school.|', {
+            items: [
+                {
+                    label: 'course',
                     resultText: 'SELECT * FROM school.student LEFT JOIN school.course',
                     detail: 'table'
                 }
