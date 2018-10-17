@@ -234,7 +234,7 @@ export class HiveCompletion {
                     textEdit: TextEdit.replace(this.getCompletionRange(existingNode), insertString),
                     kind: value.kind,
                     insertTextFormat,
-                    sortText: 'a',
+                    sortText: 'i',
                     detail: value.detail
                 };
                 result.items.push(item);
