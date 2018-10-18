@@ -175,7 +175,7 @@ export class HiveCompletion {
                 } else if (node.type === NodeType.Semicolon) {
                     this.getCompletionsSemicolon(node, result);
                 } else if (node.parent === null) {
-                    this.getCompletionForTopLevel(result);
+                    this.getCompletionsForTopLevel(result);
                 } else {
                     continue;
                 }
@@ -245,14 +245,14 @@ export class HiveCompletion {
 
     public getCompletionForProgram(result: CompletionList): CompletionList {
         if (this.program === null) {
-            return this.getCompletionForTopLevel(result);
+            return this.getCompletionsForTopLevel(result);
         }
 
         let node = this.program.findFirstChildBeforeOffset(this.offset);
         let prev: Node;
 
         if (!node) {
-            return this.getCompletionForTopLevel(result);
+            return this.getCompletionsForTopLevel(result);
         }
 
         while (node) {
@@ -271,14 +271,14 @@ export class HiveCompletion {
         return result;
     }
 
-    public getCompletionForTopLevel(result: CompletionList): CompletionList {
+    public getCompletionsForTopLevel(result: CompletionList): CompletionList {
         this.getCompletionsForKeywords(null, result);
-        this.getCompletionForFunctions(result);
+        this.getCompletionsForFunctions(result);
 
         return result;
     }
 
-    public getCompletionForFunctions(result: CompletionList): CompletionList {
+    public getCompletionsForFunctions(result: CompletionList): CompletionList {
         for (let entry of languageFacts.getFunctionsEntryList()) {
             result.items.push({
                 label: entry.name,
@@ -353,7 +353,7 @@ export class HiveCompletion {
                     this.getCompletionsForJoin(node, result);
                     break;
                 default:
-                    this.getCompletionForTopLevel(result);
+                    this.getCompletionsForTopLevel(result);
             }
         }
 
