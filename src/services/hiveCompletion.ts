@@ -37,7 +37,7 @@ export class HiveCompletion {
     nodePath: Node[];
     completionParticipants: ICompletionParticipant[] = [];
 
-    private getCompletionRange(existingNode: Node) {
+    private getCompletionRangeFromNode(existingNode: Node): Range {
         if (existingNode && existingNode.offset <= this.offset) {
             const index = existingNode.getText().indexOf('.');
             let end, start;
@@ -231,7 +231,7 @@ export class HiveCompletion {
                 let item: CompletionItem = {
                     label: value.name,
                     documentation: languageFacts.getEntryDescription(value),
-                    textEdit: TextEdit.replace(this.getCompletionRange(existingNode), insertString),
+                    textEdit: TextEdit.replace(this.getCompletionRangeFromNode(existingNode), insertString),
                     kind: value.kind,
                     insertTextFormat,
                     sortText: 'i',
@@ -272,8 +272,24 @@ export class HiveCompletion {
     }
 
     public getCompletionsForTopLevel(result: CompletionList): CompletionList {
-        this.getCompletionsForKeywords(null, result);
-        this.getCompletionsForFunctions(result);
+        if (this.currentWord.endsWith('.')) {
+            const [dbName] = this.currentWord.split('.');
+
+            for (let entry of languageFacts.getTableEntryList(dbName)) {
+                result.items.push({
+                    label: entry.name,
+                    documentation: languageFacts.getEntryDescription(entry),
+                    kind: CompletionItemKind.Text,
+                    textEdit: TextEdit.replace(Range.create(this.defaultReplaceRange.end, this.defaultReplaceRange.end), entry.name),
+                    detail: entry.detail
+                });
+            }
+        } else {
+            this.getCompletionsForKeywords(null, result);
+            this.getCompletionsForFunctions(result);
+
+            this.getCompletionsForDatabase(null, result, 'i');
+        }
 
         return result;
     }
@@ -324,19 +340,7 @@ export class HiveCompletion {
             } else {
                 const [dbName] = exprText.split('.');
 
-                for (let entry of languageFacts.getTableEntryList(dbName)) {
-                    result.items.push({
-                        label: entry.name,
-                        documentation: languageFacts.getEntryDescription(entry),
-                        kind: CompletionItemKind.Text,
-                        textEdit: TextEdit.replace(
-                            this.getCompletionRange(node),
-                            entry.name
-                        ),
-                        detail: entry.detail,
-                        sortText: 'a'
-                    });
-                }
+                this.getCompletionsForTable(node, result, dbName, 'a');
             }
         } else {
             switch (node.getText().toLowerCase()) {
@@ -365,16 +369,7 @@ export class HiveCompletion {
             this.getValueEnumProposals(entry, null, result);
         }
 
-        for (let entry of languageFacts.getDatabaseEntryList()) {
-            result.items.push({
-                label: entry.name,
-                documentation: languageFacts.getEntryDescription(entry),
-                kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                detail: entry.detail,
-                sortText: 'a'
-            });
-        }
+        this.getCompletionsForDatabase(null, result, 'a');
 
         return result;
     }
@@ -387,20 +382,7 @@ export class HiveCompletion {
              */
 
             let [db] = (node as TableName).getTableName().split('.');
-
-            for (let entry of languageFacts.getTableEntryList(db)) {
-                result.items.push({
-                    label: entry.name,
-                    documentation: languageFacts.getEntryDescription(entry),
-                    kind: CompletionItemKind.Text,
-                    textEdit: TextEdit.replace(
-                        this.getCompletionRange((node as TableName).identifier.dotNode),
-                        entry.name
-                    ),
-                    detail: entry.detail,
-                    sortText: 'a'
-                });
-            }
+            this.getCompletionsForTable(node, result, db, 'a');
         } else if (node.type === NodeType.Expr) {
             /**
              * select * from |
@@ -436,7 +418,7 @@ export class HiveCompletion {
                             label: entry.name,
                             documentation: languageFacts.getEntryDescription(entry),
                             kind: CompletionItemKind.Text,
-                            textEdit: TextEdit.replace(this.getCompletionRange(node), entry.name),
+                            textEdit: TextEdit.replace(this.getCompletionRangeFromNode(node), entry.name),
                             detail: entry.detail,
                             sortText: 'a'
                         });
@@ -463,7 +445,7 @@ export class HiveCompletion {
                         label: entry.name,
                         documentation: languageFacts.getEntryDescription(entry),
                         kind: CompletionItemKind.Text,
-                        textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                        textEdit: TextEdit.replace(this.getCompletionRangeFromNode(null), entry.name),
                         detail: entry.detail,
                         sortText: 'a'
                     });
@@ -508,7 +490,7 @@ export class HiveCompletion {
                 label: entry.name,
                 documentation: languageFacts.getEntryDescription(entry),
                 kind: CompletionItemKind.Variable,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
+                textEdit: TextEdit.replace(this.getCompletionRangeFromNode(null), entry.name),
                 detail: entry.detail,
                 sortText: 'a'
             });
@@ -516,27 +498,9 @@ export class HiveCompletion {
 
         const currentDatabase = this.getCurrentDatabase(node.offset);
 
-        for (let entry of languageFacts.getTableEntryList(currentDatabase)) {
-            result.items.push({
-                label: entry.name,
-                documentation: languageFacts.getEntryDescription(entry),
-                kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                detail: entry.detail,
-                sortText: 'b'
-            });
-        }
+        this.getCompletionsForTable(null, result, currentDatabase, 'b');
 
-        for (let entry of languageFacts.getDatabaseEntryList()) {
-            result.items.push({
-                label: entry.name,
-                documentation: languageFacts.getEntryDescription(entry),
-                kind: CompletionItemKind.Text,
-                textEdit: TextEdit.replace(this.getCompletionRange(null), entry.name),
-                detail: entry.detail,
-                sortText: 'c'
-            });
-        }
+        this.getCompletionsForDatabase(null, result, 'c');
 
         return result;
     }
@@ -547,6 +511,32 @@ export class HiveCompletion {
         this.getCompletionsForExpr(prevNode as Expr, result);
 
         return result;
+    }
+
+    private getCompletionsForDatabase(node: Node, result: CompletionList, sortText = 'd') {
+        for (let entry of languageFacts.getDatabaseEntryList()) {
+            result.items.push({
+                label: entry.name,
+                documentation: languageFacts.getEntryDescription(entry),
+                kind: CompletionItemKind.Text,
+                textEdit: TextEdit.replace(this.getCompletionRangeFromNode(node), entry.name),
+                detail: entry.detail,
+                sortText: sortText
+            });
+        }
+    }
+
+    private getCompletionsForTable(node: Node, result: CompletionList, databaseName: string, sortText = 'd') {
+        for (let entry of languageFacts.getTableEntryList(databaseName)) {
+            result.items.push({
+                label: entry.name,
+                documentation: languageFacts.getEntryDescription(entry),
+                kind: CompletionItemKind.Text,
+                textEdit: TextEdit.replace(this.getCompletionRangeFromNode(node), entry.name),
+                detail: entry.detail,
+                sortText
+            });
+        }
     }
 }
 
