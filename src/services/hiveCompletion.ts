@@ -498,7 +498,9 @@ export class HiveCompletion {
 
         const currentDatabase = this.getCurrentDatabase(node.offset);
 
-        this.getCompletionsForTable(null, result, currentDatabase, 'b');
+        if (currentDatabase) {
+            this.getCompletionsForTable(null, result, currentDatabase, 'b');
+        }
 
         this.getCompletionsForDatabase(null, result, 'c');
 
