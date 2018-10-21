@@ -153,32 +153,12 @@ export function getDatabaseEntryList(): IEntry[] {
 }
 
 export function getTableEntryList(db: string): IEntry[] {
-    if (db) {
-        return databaseService.getTables(db).map(table => {
-            return new EntryImpl({
-                name: table.name,
-                detail: 'table'
-            });
+    return databaseService.getTables(db).map(table => {
+        return new EntryImpl({
+            name: table.name,
+            detail: 'table'
         });
-    } else {
-        const result = databaseService
-            .getDatabaseList()
-            .map(db => {
-                if (db) {
-                    return db.tables.map(table => {
-                        return new EntryImpl({
-                            name: `${db.name}.${table.name}`,
-                            detail: 'table'
-                        });
-                    });
-                }
-            })
-            .filter(_ => _);
-
-        return result.reduce((prev, curr) => {
-            return prev.concat(curr);
-        }, []);
-    }
+    });
 }
 
 export function getColumnEntryList(dbName: string, tableName: string, columns: ICol[] = []): IEntry[] {

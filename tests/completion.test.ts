@@ -380,8 +380,18 @@ describe('Hive - Completion', () => {
                     detail: 'table'
                 },
                 {
-                    label: 'school.course',
-                    resultText: 'with s as (select * from school.student) select * from school.course',
+                    label: 'school',
+                    resultText: 'with s as (select * from school.student) select * from school',
+                    detail: 'database'
+                }
+            ]
+        });
+
+        testCompletionFor('with s as (select * from school.student) select * from school.|', {
+            items: [
+                {
+                    label: 'student',
+                    resultText: 'with s as (select * from school.student) select * from school.student',
                     detail: 'table'
                 }
             ]
